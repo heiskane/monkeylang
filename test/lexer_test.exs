@@ -24,9 +24,10 @@ defmodule LexerTest do
       let result = add(five, ten);
     """
 
-    tokens = Lexer.new(input)
-    |> Lexer.tokenize()
-    |> dbg()
+    tokens =
+      Lexer.new(input)
+      |> Lexer.tokenize()
+      |> dbg()
 
     expected = [
       %Monkeylang.Token{type: :ident, literal: "let"},
