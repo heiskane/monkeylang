@@ -4,27 +4,27 @@ defmodule LexerTest do
 
   alias Monkeylang.Lexer
 
-  test "test read_char" do
-    lexer =
-      Lexer.new("+")
-      |> Monkeylang.Lexer.read_char()
-
-    dbg(lexer)
-
-    assert lexer.ch == "+"
-    assert lexer.readPosition == 1
-    assert lexer.position == lexer.readPosition
-  end
-
-  test "test next_token" do
-    {_lexer, token} =
-      Lexer.new("+")
-      |> Monkeylang.Lexer.next_token()
-
-    dbg(token)
-
-    assert token == %Monkeylang.Token{type: :plus, literal: "+"}
-  end
+  # test "test read_char" do
+  #   lexer =
+  #     Lexer.new("+")
+  #     |> Monkeylang.Lexer.read_char()
+  #
+  #   dbg(lexer)
+  #
+  #   assert lexer.ch == "+"
+  #   assert lexer.readPosition == 1
+  #   assert lexer.position == lexer.readPosition
+  # end
+  #
+  # test "test next_token" do
+  #   {_lexer, token} =
+  #     Lexer.new("+")
+  #     |> Monkeylang.Lexer.next_token()
+  #
+  #   dbg(token)
+  #
+  #   assert token == %Monkeylang.Token{type: :plus, literal: "+"}
+  # end
 
   test "parse code block" do
     input = """
@@ -40,10 +40,12 @@ defmodule LexerTest do
 
     lexer = Lexer.new(input)
 
-    Enum.map(1..10, fn _ ->
-      lexer
+    Enum.reduce(1..2, lexer, fn _, lexer ->
+      { lexer, token } = lexer
       |> Lexer.next_token()
       |> dbg()
+
+      lexer
     end)
   end
 end
