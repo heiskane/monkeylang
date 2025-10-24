@@ -43,9 +43,7 @@ defmodule LexerTest do
 
     {_, tokens} =
       Enum.reduce_while(1..100, {lexer, []}, fn _, {lexer, tokens} ->
-        lexer = Lexer.read_char(lexer)
-        |> Lexer.skip_whitespace()
-        |> dbg()
+        lexer = Lexer.skip_whitespace(lexer)
 
         {lexer, token} =
           lexer
@@ -74,23 +72,30 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :ident, literal: "add"},
       %Monkeylang.Token{type: :assign, literal: "="},
       %Monkeylang.Token{type: :ident, literal: "fn"},
+      %Monkeylang.Token{type: :lparen, literal: "("},
       %Monkeylang.Token{type: :ident, literal: "x"},
+      %Monkeylang.Token{type: :comma, literal: ","},
       %Monkeylang.Token{type: :ident, literal: "y"},
+      %Monkeylang.Token{type: :rparen, literal: ")"},
       %Monkeylang.Token{type: :lbrace, literal: "{"},
       %Monkeylang.Token{type: :ident, literal: "x"},
       %Monkeylang.Token{type: :plus, literal: "+"},
       %Monkeylang.Token{type: :ident, literal: "y"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
       %Monkeylang.Token{type: :rbrace, literal: "}"},
       %Monkeylang.Token{type: :semicolon, literal: ";"},
       %Monkeylang.Token{type: :ident, literal: "let"},
       %Monkeylang.Token{type: :ident, literal: "result"},
       %Monkeylang.Token{type: :assign, literal: "="},
       %Monkeylang.Token{type: :ident, literal: "add"},
+      %Monkeylang.Token{type: :lparen, literal: "("},
       %Monkeylang.Token{type: :ident, literal: "five"},
+      %Monkeylang.Token{type: :comma, literal: ","},
       %Monkeylang.Token{type: :ident, literal: "ten"},
+      %Monkeylang.Token{type: :rparen, literal: ")"},
       %Monkeylang.Token{type: :semicolon, literal: ";"}
     ]
 
-    # assert Enum.reverse(tokens) == expected
+    assert Enum.reverse(tokens) == expected
   end
 end

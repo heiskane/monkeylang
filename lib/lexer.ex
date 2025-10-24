@@ -63,18 +63,19 @@ defmodule Monkeylang.Lexer do
   end
 
   def next_token(%__MODULE__{} = lexer) do
-    case lexer.ch do
-      "=" -> { lexer, Token.new(:assign, lexer.ch) }
-      "+" -> { lexer, Token.new(:plus, lexer.ch) }
-      "(" -> { lexer, Token.new(:lparen, lexer.ch) }
-      ")" -> { lexer, Token.new(:rparen, lexer.ch) }
-      "{" -> { lexer, Token.new(:lbrace, lexer.ch) }
-      "}" -> { lexer, Token.new(:rbrace, lexer.ch) }
-      "," -> { lexer, Token.new(:comma, lexer.ch) }
-      ";" -> { lexer, Token.new(:semicolon, lexer.ch) }
-      "" -> { lexer, Token.new(:eof, lexer.ch) }
-      _ -> { lexer, Token.new(:illegal, lexer.ch) }
+    token = case lexer.ch do
+      "=" -> Token.new(:assign, lexer.ch)
+      "+" -> Token.new(:plus, lexer.ch)
+      "(" -> Token.new(:lparen, lexer.ch)
+      ")" -> Token.new(:rparen, lexer.ch)
+      "{" -> Token.new(:lbrace, lexer.ch)
+      "}" -> Token.new(:rbrace, lexer.ch)
+      "," -> Token.new(:comma, lexer.ch)
+      ";" -> Token.new(:semicolon, lexer.ch)
+      "" -> Token.new(:eof, lexer.ch)
+      _ -> Token.new(:illegal, lexer.ch)
     end
+    { read_char(lexer), token }
   end
 
   def skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
