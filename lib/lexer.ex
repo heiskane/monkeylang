@@ -6,8 +6,8 @@ defmodule Monkeylang.Lexer do
   defmacro is_letter(ch) do
     quote do
       ("a" <= unquote(ch) and unquote(ch) <= "z") or
-      ("A" <= unquote(ch) and unquote(ch) <= "Z") or
-      (unquote(ch) == "_")
+        ("A" <= unquote(ch) and unquote(ch) <= "Z") or
+        unquote(ch) == "_"
     end
   end
 
@@ -20,21 +20,26 @@ defmodule Monkeylang.Lexer do
       input: lexer.input,
       readPosition: lexer.readPosition + 1,
       position: lexer.position + 1,
-      ch: String.at(lexer.input, lexer.readPosition),
+      ch: String.at(lexer.input, lexer.readPosition)
     }
   end
 
   def next_token(%__MODULE__{} = lexer) do
-    lexer = lexer
-    |> read_char()
-    { lexer, Token.from_string(lexer.ch) }
+    lexer =
+      lexer
+      |> read_char()
+
+    # TODO: check if we should read a whole identifier
+    {lexer, Token.from_string(lexer.ch)}
   end
 
   def read_identifier(%__MODULE__{} = lexer) do
     read_identifier(lexer, "")
   end
 
-  defp read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch), do: identifier
+  defp read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch),
+    do: identifier
+
   defp read_identifier(%__MODULE__{} = lexer, identifier) do
     read_char(lexer)
     |> read_identifier(identifier <> lexer.ch)
@@ -44,6 +49,7 @@ defmodule Monkeylang.Lexer do
 end
 
 lexer = Monkeylang.Lexer.new("asdf qwer")
+
 Monkeylang.Lexer.read_char(lexer)
 |> Monkeylang.Lexer.read_identifier()
 |> dbg()
