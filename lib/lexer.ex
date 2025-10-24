@@ -7,8 +7,6 @@ defmodule Monkeylang.Lexer do
     %__MODULE__{input: input}
   end
 
-  def parse(input) do end
-
   def read_char(%__MODULE__{} = lexer) do
     %__MODULE__{
       input: lexer.input,
@@ -19,6 +17,12 @@ defmodule Monkeylang.Lexer do
   end
 
   def next_token(%__MODULE__{} = lexer) do
+    lexer = lexer
+    |> read_char()
     { lexer, Token.from_string(lexer.ch) }
+  end
+
+  def is_letter(ch) do
+    "a" <= ch && ch <= "z" || "A" <= ch && ch <= "Z" || ch == "_"
   end
 end
