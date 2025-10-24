@@ -5,11 +5,23 @@ defmodule LexerTest do
   alias Monkeylang.Lexer
 
   test "test read_char" do
-    { lexer, char } = Lexer.new("+")
+    lexer = Lexer.new("+")
     |> Monkeylang.Lexer.read_char()
 
-    assert char == "+"
+    dbg(lexer)
+
+    assert lexer.ch == "+"
     assert lexer.readPosition == 1
     assert lexer.position == lexer.readPosition
+  end
+
+  test "test next_token" do
+    { lexer, token } = Lexer.new("+")
+    |> Monkeylang.Lexer.read_char()
+    |> Monkeylang.Lexer.next_token()
+
+    dbg(token)
+    
+    assert token == %Monkeylang.Token{ type: :plus, literal: "+" }
   end
 end
