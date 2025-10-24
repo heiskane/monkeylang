@@ -50,19 +50,19 @@ defmodule Monkeylang.Lexer do
     }
   end
 
-  defp skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
+  def next_token(%__MODULE__{} = lexer) when is_letter(lexer.ch) do
+    { lexer, identifier } = read_identifier(lexer)
+    token_type = Map.get(@keywords, identifier, :ident)
+    token = Token.new(token_type, identifier)
+    { lexer, token }
+  end
 
-  defp skip_whitespace(%__MODULE__{} = lexer),
-    do:
-      read_char(lexer)
-      |> skip_whitespace()
+  def next_token(%__MODULE__{} = lexer) when is_digit(lexer.ch) do
+    { lexer, number } = read_number(lexer)
+    { lexer, Token.new(:int, number) }
+  end
 
   def next_token(%__MODULE__{} = lexer) do
-    lexer =
-      lexer
-      |> read_char()
-      |> skip_whitespace()
-
     case lexer.ch do
       "=" -> { lexer, Token.new(:assign, lexer.ch) }
       "+" -> { lexer, Token.new(:plus, lexer.ch) }
@@ -73,26 +73,31 @@ defmodule Monkeylang.Lexer do
       "," -> { lexer, Token.new(:comma, lexer.ch) }
       ";" -> { lexer, Token.new(:semicolon, lexer.ch) }
       "" -> { lexer, Token.new(:eof, lexer.ch) }
-      _ -> case is_letter(lexer.ch) do
-        true ->
-          { lexer, identifier } = read_identifier(lexer)
-          token = Map.get(@keywords, identifier, :ident)
-          |> Token.new(identifier)
-          { lexer, token }
-        false -> { lexer, Token.new(:illegal, lexer.ch) }
-      end
+      _ -> { lexer, Token.new(:illegal, lexer.ch) }
     end
   end
 
-  def read_identifier(%__MODULE__{} = lexer) do
-    read_identifier(lexer, "")
-  end
+  def skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
+  def skip_whitespace(%__MODULE__{} = lexer),
+    do:
+      read_char(lexer)
+      |> skip_whitespace()
 
+  def read_identifier(%__MODULE__{} = lexer), do: read_identifier(lexer, "")
   defp read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch),
     do: {lexer, identifier}
 
   defp read_identifier(%__MODULE__{} = lexer, identifier) do
     read_char(lexer)
     |> read_identifier(identifier <> lexer.ch)
+  end
+
+  def read_number(%__MODULE__{} = lexer), do: read_number(lexer, "")
+  defp read_number(%__MODULE__{} = lexer, number) when not is_digit(lexer.ch),
+    do: {lexer, number}
+
+  defp read_number(%__MODULE__{} = lexer, number) do
+    read_char(lexer)
+    |> read_number(number <> lexer.ch)
   end
 end
