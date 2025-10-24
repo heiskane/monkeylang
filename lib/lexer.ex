@@ -8,10 +8,11 @@ defmodule Monkeylang.Lexer do
     let: :let
   }
 
-  defmacro is_digit(ch),
-    do:
-      "0" <= unquote(ch) and
-        unquote(ch) <= "9"
+  defmacro is_digit(ch) do
+    quote do
+      "0" <= unquote(ch) and unquote(ch) <= "9"
+    end
+  end
 
   defmacro is_letter(ch) do
     quote do
