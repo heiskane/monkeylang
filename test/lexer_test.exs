@@ -24,22 +24,9 @@ defmodule LexerTest do
       let result = add(five, ten);
     """
 
-    lexer = Lexer.new(input)
-    lexer = Lexer.read_char(lexer)
-
-    {_, tokens} =
-      Enum.reduce_while(1..100, {lexer, []}, fn _, {lexer, tokens} ->
-        {lexer, token} =
-          lexer
-          |> Lexer.next_token()
-
-        case token.type do
-          :eof -> {:halt, {lexer, tokens}}
-          _ -> {:cont, {lexer, [token | tokens]}}
-        end
-      end)
-
-    dbg(Enum.reverse(tokens))
+    tokens = Lexer.new(input)
+    |> Lexer.tokenize()
+    |> dbg()
 
     expected = [
       %Monkeylang.Token{type: :ident, literal: "let"},
@@ -77,9 +64,10 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :comma, literal: ","},
       %Monkeylang.Token{type: :ident, literal: "ten"},
       %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"}
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :eof, literal: ""}
     ]
 
-    assert Enum.reverse(tokens) == expected
+    assert tokens == expected
   end
 end

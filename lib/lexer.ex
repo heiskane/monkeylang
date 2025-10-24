@@ -50,6 +50,15 @@ defmodule Monkeylang.Lexer do
     }
   end
 
+  def tokenize(%__MODULE__{} = lexer), do: tokenize(lexer, [])
+  defp tokenize(%__MODULE__{} = _lexer, tokens) when hd(tokens).type == :eof, do:
+    Enum.reverse(tokens)
+
+  defp tokenize(%__MODULE__{} = lexer, tokens) do
+    { lexer, token } = next_token(lexer)
+    tokenize(lexer, [ token | tokens ])
+  end
+
   def next_token(%__MODULE__{} = lexer) do
     lexer
     |> skip_whitespace()
