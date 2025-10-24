@@ -50,19 +50,25 @@ defmodule Monkeylang.Lexer do
     }
   end
 
-  def next_token(%__MODULE__{} = lexer) when is_letter(lexer.ch) do
+  def next_token(%__MODULE__{} = lexer) do
+    lexer
+    |> skip_whitespace()
+    |> parse_token()
+  end
+
+  defp parse_token(%__MODULE__{} = lexer) when is_letter(lexer.ch) do
     { lexer, identifier } = read_identifier(lexer)
     token_type = Map.get(@keywords, identifier, :ident)
     token = Token.new(token_type, identifier)
     { lexer, token }
   end
 
-  def next_token(%__MODULE__{} = lexer) when is_digit(lexer.ch) do
+  defp parse_token(%__MODULE__{} = lexer) when is_digit(lexer.ch) do
     { lexer, number } = read_number(lexer)
     { lexer, Token.new(:int, number) }
   end
 
-  def next_token(%__MODULE__{} = lexer) do
+  defp parse_token(%__MODULE__{} = lexer) do
     token = case lexer.ch do
       "=" -> Token.new(:assign, lexer.ch)
       "+" -> Token.new(:plus, lexer.ch)
@@ -78,8 +84,8 @@ defmodule Monkeylang.Lexer do
     { read_char(lexer), token }
   end
 
-  def skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
-  def skip_whitespace(%__MODULE__{} = lexer),
+  defp skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
+  defp skip_whitespace(%__MODULE__{} = lexer),
     do:
       read_char(lexer)
       |> skip_whitespace()

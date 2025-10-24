@@ -43,8 +43,6 @@ defmodule LexerTest do
 
     {_, tokens} =
       Enum.reduce_while(1..100, {lexer, []}, fn _, {lexer, tokens} ->
-        lexer = Lexer.skip_whitespace(lexer)
-
         {lexer, token} =
           lexer
           |> Lexer.next_token()
