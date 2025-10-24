@@ -4,14 +4,6 @@ defmodule LexerTest do
 
   alias Monkeylang.Lexer
 
-  test "test next_token" do
-    {_lexer, token} =
-      Lexer.new("+")
-      |> Monkeylang.Lexer.next_token()
-
-    assert token == %Monkeylang.Token{type: :plus, literal: "+"}
-  end
-
   test "parse code block" do
     input = """
       let five = 5;
@@ -27,7 +19,8 @@ defmodule LexerTest do
     tokens =
       Lexer.new(input)
       |> Lexer.tokenize()
-      |> dbg()
+
+    dbg(tokens)
 
     expected = [
       %Monkeylang.Token{type: :ident, literal: "let"},

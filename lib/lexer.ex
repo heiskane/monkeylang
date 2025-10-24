@@ -60,7 +60,7 @@ defmodule Monkeylang.Lexer do
     do_tokenize(lexer, [token | tokens])
   end
 
-  def next_token(%__MODULE__{} = lexer) do
+  defp next_token(%__MODULE__{} = lexer) do
     lexer
     |> skip_whitespace()
     |> parse_token()
@@ -103,7 +103,7 @@ defmodule Monkeylang.Lexer do
       read_char(lexer)
       |> skip_whitespace()
 
-  def read_identifier(%__MODULE__{} = lexer), do: read_identifier(lexer, "")
+  defp read_identifier(%__MODULE__{} = lexer), do: read_identifier(lexer, "")
 
   defp read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch),
     do: {lexer, identifier}
@@ -113,7 +113,7 @@ defmodule Monkeylang.Lexer do
     |> read_identifier(identifier <> lexer.ch)
   end
 
-  def read_number(%__MODULE__{} = lexer), do: read_number(lexer, "")
+  defp read_number(%__MODULE__{} = lexer), do: read_number(lexer, "")
 
   defp read_number(%__MODULE__{} = lexer, number) when not is_digit(lexer.ch),
     do: {lexer, number}
