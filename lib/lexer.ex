@@ -1,5 +1,5 @@
 defmodule Monkeylang.Lexer do
-  defstruct [:input, position: 0, read_position: 0, ch: 0]
+  defstruct [:input, position: 0, read_position: 0, ch: nil]
 
   alias Monkeylang.Token
 
@@ -35,28 +35,28 @@ defmodule Monkeylang.Lexer do
     %__MODULE__{input: input, ch: String.at(input, 0)}
   end
 
-  def read_char(%__MODULE__{} = lexer) do
+  def read_char(%__MODULE__{input: input, read_position: pos} = lexer) do
     ch =
-      case lexer.read_position >= String.length(lexer.input) do
+      case pos >= String.length(input) do
         true -> ""
-        false -> String.at(lexer.input, lexer.read_position)
+        false -> String.at(input, pos)
       end
 
     %__MODULE__{
-      input: lexer.input,
-      read_position: lexer.read_position + 1,
+      input: input,
+      read_position: pos + 1,
       position: lexer.position + 1,
       ch: ch
     }
   end
 
-  def tokenize(%__MODULE__{} = lexer), do: tokenize(lexer, [])
-  defp tokenize(%__MODULE__{} = _lexer, tokens) when hd(tokens).type == :eof, do:
-    Enum.reverse(tokens)
+  def tokenize(%__MODULE__{} = lexer), do: do_tokenize(lexer, [])
 
-  defp tokenize(%__MODULE__{} = lexer, tokens) do
+  defp do_tokenize(%__MODULE__{} = _lexer, tokens) when hd(tokens).type == :eof, do:
+    Enum.reverse(tokens)
+  defp do_tokenize(%__MODULE__{} = lexer, tokens) do
     { lexer, token } = next_token(lexer)
-    tokenize(lexer, [ token | tokens ])
+    do_tokenize(lexer, [ token | tokens ])
   end
 
   def next_token(%__MODULE__{} = lexer) do
