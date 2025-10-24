@@ -5,12 +5,13 @@ defmodule Monkeylang.Lexer do
 
   @keywords %{
     fn: :function,
-    let: :let,
+    let: :let
   }
 
-  defmacro is_digit(ch), do:
-    "0" <= unquote(ch) and
-      unquote(ch) <= "9"
+  defmacro is_digit(ch),
+    do:
+      "0" <= unquote(ch) and
+        unquote(ch) <= "9"
 
   defmacro is_letter(ch) do
     quote do
@@ -23,9 +24,9 @@ defmodule Monkeylang.Lexer do
   defmacro is_whitespace(ch) do
     quote do
       unquote(ch) == " " or
-      unquote(ch) == "\t" or
-      unquote(ch) == "\n" or
-      unquote(ch) == "\r"
+        unquote(ch) == "\t" or
+        unquote(ch) == "\n" or
+        unquote(ch) == "\r"
     end
   end
 
@@ -34,10 +35,11 @@ defmodule Monkeylang.Lexer do
   end
 
   def read_char(%__MODULE__{} = lexer) do
-    ch = case lexer.read_position >= String.length(lexer.input)  do
-      true -> ""
-      false -> String.at(lexer.input, lexer.read_position)
-    end
+    ch =
+      case lexer.read_position >= String.length(lexer.input) do
+        true -> ""
+        false -> String.at(lexer.input, lexer.read_position)
+      end
 
     %__MODULE__{
       input: lexer.input,
@@ -48,9 +50,11 @@ defmodule Monkeylang.Lexer do
   end
 
   defp skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
-  defp skip_whitespace(%__MODULE__{} = lexer), do:
-    read_char(lexer)
-    |> skip_whitespace()
+
+  defp skip_whitespace(%__MODULE__{} = lexer),
+    do:
+      read_char(lexer)
+      |> skip_whitespace()
 
   def next_token(%__MODULE__{} = lexer) do
     lexer =
@@ -84,7 +88,7 @@ defmodule Monkeylang.Lexer do
   end
 
   defp read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch),
-    do: { lexer, identifier }
+    do: {lexer, identifier}
 
   defp read_identifier(%__MODULE__{} = lexer, identifier) do
     read_char(lexer)

@@ -40,15 +40,17 @@ defmodule LexerTest do
 
     lexer = Lexer.new(input)
 
-    { _, tokens } = Enum.reduce_while(1..100, {lexer, []}, fn _, { lexer, tokens } ->
-      { lexer, token } = lexer
-      |> Lexer.next_token()
+    {_, tokens} =
+      Enum.reduce_while(1..100, {lexer, []}, fn _, {lexer, tokens} ->
+        {lexer, token} =
+          lexer
+          |> Lexer.next_token()
 
-      case token.type do
-        :eof -> { :halt, { lexer, tokens } }
-        _ -> { :cont, { lexer, [ token | tokens ] } }
-      end
-    end)
+        case token.type do
+          :eof -> {:halt, {lexer, tokens}}
+          _ -> {:cont, {lexer, [token | tokens]}}
+        end
+      end)
 
     dbg(Enum.reverse(tokens))
 
