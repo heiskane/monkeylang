@@ -32,7 +32,7 @@ defmodule Monkeylang.Lexer do
   end
 
   def new(input) do
-    %__MODULE__{input: input}
+    %__MODULE__{input: input, ch: String.at(input, 0)}
   end
 
   def read_char(%__MODULE__{} = lexer) do
