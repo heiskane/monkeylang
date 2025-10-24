@@ -16,6 +16,7 @@ defmodule Monkeylang.Token do
       "," -> new(:comma, char)
       ";" -> new(:semicolon, char)
       "" -> new(:eof, char)
+      _ -> new(:illegal, char)
     end
   end
 end
