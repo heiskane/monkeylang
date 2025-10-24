@@ -40,13 +40,51 @@ defmodule LexerTest do
 
     lexer = Lexer.new(input)
 
-    Enum.reduce(1..10, lexer, fn _, lexer ->
+    { _, tokens } = Enum.reduce_while(1..100, {lexer, []}, fn _, { lexer, tokens } ->
       { lexer, token } = lexer
       |> Lexer.next_token()
 
-      dbg(token)
-
-      lexer
+      case token.type do
+        :eof -> { :halt, { lexer, tokens } }
+        _ -> { :cont, { lexer, [ token | tokens ] } }
+      end
     end)
+
+    dbg(Enum.reverse(tokens))
+
+    expected = [
+      %Monkeylang.Token{type: :ident, literal: "let"},
+      %Monkeylang.Token{type: :ident, literal: "five"},
+      %Monkeylang.Token{type: :assign, literal: "="},
+      %Monkeylang.Token{type: :illegal, literal: "5"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :ident, literal: "let"},
+      %Monkeylang.Token{type: :ident, literal: "ten"},
+      %Monkeylang.Token{type: :assign, literal: "="},
+      %Monkeylang.Token{type: :illegal, literal: "1"},
+      %Monkeylang.Token{type: :illegal, literal: "0"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :ident, literal: "let"},
+      %Monkeylang.Token{type: :ident, literal: "add"},
+      %Monkeylang.Token{type: :assign, literal: "="},
+      %Monkeylang.Token{type: :ident, literal: "fn"},
+      %Monkeylang.Token{type: :ident, literal: "x"},
+      %Monkeylang.Token{type: :ident, literal: "y"},
+      %Monkeylang.Token{type: :lbrace, literal: "{"},
+      %Monkeylang.Token{type: :ident, literal: "x"},
+      %Monkeylang.Token{type: :plus, literal: "+"},
+      %Monkeylang.Token{type: :ident, literal: "y"},
+      %Monkeylang.Token{type: :rbrace, literal: "}"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :ident, literal: "let"},
+      %Monkeylang.Token{type: :ident, literal: "result"},
+      %Monkeylang.Token{type: :assign, literal: "="},
+      %Monkeylang.Token{type: :ident, literal: "add"},
+      %Monkeylang.Token{type: :ident, literal: "five"},
+      %Monkeylang.Token{type: :ident, literal: "ten"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"}
+    ]
+
+    assert Enum.reverse(tokens) == expected
   end
 end
