@@ -40,10 +40,11 @@ defmodule LexerTest do
 
     lexer = Lexer.new(input)
 
-    Enum.reduce(1..2, lexer, fn _, lexer ->
+    Enum.reduce(1..10, lexer, fn _, lexer ->
       { lexer, token } = lexer
       |> Lexer.next_token()
-      |> dbg()
+
+      dbg(token)
 
       lexer
     end)

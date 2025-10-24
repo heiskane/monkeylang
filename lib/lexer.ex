@@ -1,5 +1,5 @@
 defmodule Monkeylang.Lexer do
-  defstruct [:input, position: 0, readPosition: 0, ch: 0]
+  defstruct [:input, position: 0, read_position: 0, ch: 0]
 
   alias Monkeylang.Token
 
@@ -30,11 +30,16 @@ defmodule Monkeylang.Lexer do
   end
 
   def read_char(%__MODULE__{} = lexer) do
+    ch = case lexer.read_position >= String.length(lexer.input)  do
+      true -> ""
+      false -> String.at(lexer.input, lexer.read_position)
+    end
+
     %__MODULE__{
       input: lexer.input,
-      readPosition: lexer.readPosition + 1,
+      read_position: lexer.read_position + 1,
       position: lexer.position + 1,
-      ch: String.at(lexer.input, lexer.readPosition)
+      ch: ch
     }
   end
 
@@ -49,26 +54,25 @@ defmodule Monkeylang.Lexer do
       |> read_char()
       |> skip_whitespace()
 
-    token = case lexer.ch do
-      "=" -> Token.new(:assign, lexer.ch)
-      "+" -> Token.new(:plus, lexer.ch)
-      "(" -> Token.new(:lparen, lexer.ch)
-      ")" -> Token.new(:rparen, lexer.ch)
-      "{" -> Token.new(:lbrace, lexer.ch)
-      "}" -> Token.new(:rbrace, lexer.ch)
-      "," -> Token.new(:comma, lexer.ch)
-      ";" -> Token.new(:semicolon, lexer.ch)
-      "" -> Token.new(:eof, lexer.ch)
+    case lexer.ch do
+      "=" -> { lexer, Token.new(:assign, lexer.ch) }
+      "+" -> { lexer, Token.new(:plus, lexer.ch) }
+      "(" -> { lexer, Token.new(:lparen, lexer.ch) }
+      ")" -> { lexer, Token.new(:rparen, lexer.ch) }
+      "{" -> { lexer, Token.new(:lbrace, lexer.ch) }
+      "}" -> { lexer, Token.new(:rbrace, lexer.ch) }
+      "," -> { lexer, Token.new(:comma, lexer.ch) }
+      ";" -> { lexer, Token.new(:semicolon, lexer.ch) }
+      "" -> { lexer, Token.new(:eof, lexer.ch) }
       _ -> case is_letter(lexer.ch) do
         true ->
           { lexer, identifier } = read_identifier(lexer)
-          Map.get(@keywords, identifier, :ident)
+          token = Map.get(@keywords, identifier, :ident)
           |> Token.new(identifier)
-        false -> Token.new(:illegal, lexer.ch)
+          { lexer, token }
+        false -> { lexer, Token.new(:illegal, lexer.ch) }
       end
     end
-
-    {lexer, token}
   end
 
   def read_identifier(%__MODULE__{} = lexer) do
