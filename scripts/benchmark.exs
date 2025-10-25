@@ -1,12 +1,18 @@
-items = Enum.to_list(1..10_000)
+input = """
+  let five = 5;
+  let ten = 10;
+
+  let add = fn(x, y) {
+    x + y;
+  };
+
+  let result = add(five, ten);
+"""
 
 Benchee.run(%{
-  "append" => fn ->
-    Enum.reduce(items, [], fn i, acc -> acc ++ [i * 2] end)
+  "lexer1" => fn ->
+    Monkeylang.Lexer.new(input)
+    |> Monkeylang.Lexer.tokenize()
   end,
-  "prepend+reverse" => fn ->
-    items
-    |> Enum.reduce([], fn i, acc -> [i * 2 | acc] end)
-    |> Enum.reverse()
-  end
+  "lexer2" => fn -> Monkeylang.Lexer2.tokenize(input) end,
 })
