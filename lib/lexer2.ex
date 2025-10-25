@@ -33,10 +33,10 @@ defmodule Monkeylang.Lexer2 do
   def tokenize(input) do
     String.graphemes(input)
     |> do_tokenize([])
-    |> Enum.reverse()
   end
 
-  defp do_tokenize([], tokens), do: [Token.new(:eof, "") | tokens]
+  defp do_tokenize([], tokens),
+    do: Enum.reverse([Token.new(:eof, "") | tokens])
 
   defp do_tokenize([char | tail], tokens) when is_whitespace(char),
     do: do_tokenize(tail, tokens)
