@@ -32,22 +32,8 @@ defmodule Monkeylang.Lexer do
   end
 
   def new(input) do
-    %__MODULE__{input: input, ch: String.at(input, 0)}
-  end
-
-  def read_char(%__MODULE__{input: input, read_position: pos} = lexer) do
-    ch =
-      case pos >= String.length(input) do
-        true -> ""
-        false -> String.at(input, pos)
-      end
-
-    %__MODULE__{
-      input: input,
-      read_position: pos + 1,
-      position: lexer.position,
-      ch: ch
-    }
+    %__MODULE__{input: input}
+    |> read_char()
   end
 
   def tokenize(%__MODULE__{} = lexer), do: do_tokenize(lexer, [])
@@ -60,40 +46,50 @@ defmodule Monkeylang.Lexer do
     do_tokenize(lexer, [token | tokens])
   end
 
-  defp next_token(%__MODULE__{} = lexer) do
+  def next_token(%__MODULE__{} = lexer) do
     lexer
     |> skip_whitespace()
     |> parse_token()
-  end
-
-  defp parse_token(%__MODULE__{} = lexer) when is_letter(lexer.ch) do
-    {lexer, identifier} = read_identifier(lexer)
-    token_type = Map.get(@keywords, identifier, :ident)
-    token = Token.new(token_type, identifier)
-    {lexer, token}
-  end
-
-  defp parse_token(%__MODULE__{} = lexer) when is_digit(lexer.ch) do
-    {lexer, number} = read_number(lexer)
-    {lexer, Token.new(:int, number)}
+    |> dbg()
   end
 
   defp parse_token(%__MODULE__{} = lexer) do
-    token =
-      case lexer.ch do
-        "=" -> Token.new(:assign, lexer.ch)
-        "+" -> Token.new(:plus, lexer.ch)
-        "(" -> Token.new(:lparen, lexer.ch)
-        ")" -> Token.new(:rparen, lexer.ch)
-        "{" -> Token.new(:lbrace, lexer.ch)
-        "}" -> Token.new(:rbrace, lexer.ch)
-        "," -> Token.new(:comma, lexer.ch)
-        ";" -> Token.new(:semicolon, lexer.ch)
-        "" -> Token.new(:eof, lexer.ch)
-        _ -> Token.new(:illegal, lexer.ch)
+    case lexer.ch do
+      "=" -> { read_char(lexer), Token.new(:assign, lexer.ch)}
+      "+" -> { read_char(lexer), Token.new(:plus, lexer.ch)}
+      "(" -> { read_char(lexer), Token.new(:lparen, lexer.ch)}
+      ")" -> { read_char(lexer), Token.new(:rparen, lexer.ch)}
+      "{" -> { read_char(lexer), Token.new(:lbrace, lexer.ch)}
+      "}" -> { read_char(lexer), Token.new(:rbrace, lexer.ch)}
+      "," -> { read_char(lexer), Token.new(:comma, lexer.ch)}
+      ";" -> { read_char(lexer), Token.new(:semicolon, lexer.ch)}
+      "" -> { read_char(lexer), Token.new(:eof, lexer.ch)}
+      _ -> cond do
+        is_letter(lexer.ch) ->
+          {lexer, identifier} = read_identifier(lexer)
+          token_type = Map.get(@keywords, identifier, :ident)
+          {lexer, Token.new(token_type, identifier)}
+        is_digit(lexer.ch) -> ""
+          {lexer, number} = read_number(lexer)
+          {lexer, Token.new(:int, number)}
+        true -> { read_char(lexer), Token.new(:illegal, lexer.ch) }
+      end
+    end
+  end
+
+  defp read_char(%__MODULE__{input: input, read_position: pos} = lexer) do
+    ch =
+      case pos >= String.length(input) do
+        true -> ""
+        false -> String.at(input, pos)
       end
 
-    {read_char(lexer), token}
+    %__MODULE__{
+      input: input,
+      read_position: pos + 1,
+      position: lexer.read_position,
+      ch: ch
+    }
   end
 
   defp skip_whitespace(%__MODULE__{} = lexer) when not is_whitespace(lexer.ch), do: lexer
@@ -103,14 +99,14 @@ defmodule Monkeylang.Lexer do
       read_char(lexer)
       |> skip_whitespace()
 
-  defp read_identifier(%__MODULE__{} = lexer), do: read_identifier(lexer, "")
+  defp read_identifier(%__MODULE__{} = lexer), do: do_read_identifier(lexer, "")
 
-  defp read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch),
+  defp do_read_identifier(%__MODULE__{} = lexer, identifier) when not is_letter(lexer.ch),
     do: {lexer, identifier}
 
-  defp read_identifier(%__MODULE__{} = lexer, identifier) do
+  defp do_read_identifier(%__MODULE__{} = lexer, identifier) do
     read_char(lexer)
-    |> read_identifier(identifier <> lexer.ch)
+    |> do_read_identifier(identifier <> lexer.ch)
   end
 
   defp read_number(%__MODULE__{} = lexer), do: read_number(lexer, "")

@@ -4,6 +4,38 @@ defmodule LexerTest do
 
   alias Monkeylang.Lexer
 
+  test "test next_token" do
+    input = "=+(){},;"
+
+    lexer = Lexer.new(input)
+
+    expected = [
+      %Monkeylang.Token{type: :assign, literal: "="},
+      %Monkeylang.Token{type: :plus, literal: "+"},
+      %Monkeylang.Token{type: :lparen, literal: "("},
+      %Monkeylang.Token{type: :rparen, literal: ")"},
+      %Monkeylang.Token{type: :lbrace, literal: "{"},
+      %Monkeylang.Token{type: :rbrace, literal: "}"},
+      %Monkeylang.Token{type: :comma, literal: ","},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :eof, literal: ""},
+    ]
+
+    # Lexer.tokenize(lexer)
+    # |> dbg()
+
+    Enum.reduce_while(expected, lexer, fn t, lexer ->
+      # dbg({ t, lexer })
+      { lexer, token } = Lexer.next_token(lexer)
+      assert token == t
+
+      case token.type do
+        :eof -> { :halt, lexer }
+        _ -> { :cont, lexer }
+      end
+    end)
+  end
+
   test "parse code block" do
     input = """
       let five = 5;
