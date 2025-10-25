@@ -20,8 +20,6 @@ defmodule LexerTest do
       Lexer.new(input)
       |> Lexer.tokenize()
 
-    dbg(tokens)
-
     expected = [
       %Monkeylang.Token{type: :ident, literal: "let"},
       %Monkeylang.Token{type: :ident, literal: "five"},
