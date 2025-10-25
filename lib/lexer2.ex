@@ -63,6 +63,7 @@ defmodule Monkeylang.Lexer2 do
       "," -> Token.new(:comma, char)
       ";" -> Token.new(:semicolon, char)
       "" -> Token.new(:eof, char)
+      _ -> Token.new(:illegal, char)
     end
     do_tokenize(tail, [ token | tokens ])
   end
