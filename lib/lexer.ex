@@ -50,7 +50,6 @@ defmodule Monkeylang.Lexer do
     lexer
     |> skip_whitespace()
     |> parse_token()
-    |> dbg()
   end
 
   defp parse_token(%__MODULE__{} = lexer) do
