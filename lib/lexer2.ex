@@ -35,42 +35,43 @@ defmodule Monkeylang.Lexer2 do
     |> Enum.reverse()
   end
 
-  defp do_tokenize([], tokens), do:
-    [ Token.new(:eof, "") |  tokens ]
+  defp do_tokenize([], tokens), do: [Token.new(:eof, "") | tokens]
 
-  defp do_tokenize([ char | tail ], tokens) when is_whitespace(char),
+  defp do_tokenize([char | tail], tokens) when is_whitespace(char),
     do: do_tokenize(tail, tokens)
 
-  defp do_tokenize([ char | tail ], tokens) when is_letter(char) do
-    { ident, rest } = read_ident(tail, char)
+  defp do_tokenize([char | tail], tokens) when is_letter(char) do
+    {ident, rest} = read_ident(tail, char)
     token_type = Map.get(@keywords, ident, :ident)
-    do_tokenize(rest, [ Token.new(token_type, ident) | tokens ])
+    do_tokenize(rest, [Token.new(token_type, ident) | tokens])
   end
 
-  defp do_tokenize([ char | tail ], tokens) when is_digit(char) do
-    { number, rest } = read_number(tail, char)
-    do_tokenize(rest, [ Token.new(:int, number) | tokens ])
+  defp do_tokenize([char | tail], tokens) when is_digit(char) do
+    {number, rest} = read_number(tail, char)
+    do_tokenize(rest, [Token.new(:int, number) | tokens])
   end
 
-  defp do_tokenize([ char | tail ], tokens) do
-    token = case char do
-      "=" -> Token.new(:assign, char)
-      "+" -> Token.new(:plus, char)
-      "(" -> Token.new(:lparen, char)
-      ")" -> Token.new(:rparen, char)
-      "{" -> Token.new(:lbrace, char)
-      "}" -> Token.new(:rbrace, char)
-      "," -> Token.new(:comma, char)
-      ";" -> Token.new(:semicolon, char)
-      "" -> Token.new(:eof, char)
-      _ -> Token.new(:illegal, char)
-    end
-    do_tokenize(tail, [ token | tokens ])
+  defp do_tokenize([char | tail], tokens) do
+    token =
+      case char do
+        "=" -> Token.new(:assign, char)
+        "+" -> Token.new(:plus, char)
+        "(" -> Token.new(:lparen, char)
+        ")" -> Token.new(:rparen, char)
+        "{" -> Token.new(:lbrace, char)
+        "}" -> Token.new(:rbrace, char)
+        "," -> Token.new(:comma, char)
+        ";" -> Token.new(:semicolon, char)
+        "" -> Token.new(:eof, char)
+        _ -> Token.new(:illegal, char)
+      end
+
+    do_tokenize(tail, [token | tokens])
   end
 
-  defp read_number(input, number) when not is_digit(hd(input)), do: { number, input }
-  defp read_number([ char | tail ], number), do: read_number(tail, number <> char)
+  defp read_number(input, number) when not is_digit(hd(input)), do: {number, input}
+  defp read_number([char | tail], number), do: read_number(tail, number <> char)
 
-  defp read_ident(input, ident) when not is_letter(hd(input)), do: { ident, input }
-  defp read_ident([ char | tail ], ident), do: read_ident(tail, ident <> char)
+  defp read_ident(input, ident) when not is_letter(hd(input)), do: {ident, input}
+  defp read_ident([char | tail], ident), do: read_ident(tail, ident <> char)
 end
