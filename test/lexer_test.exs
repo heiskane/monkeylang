@@ -21,11 +21,7 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :eof, literal: ""},
     ]
 
-    # Lexer.tokenize(lexer)
-    # |> dbg()
-
     Enum.reduce_while(expected, lexer, fn t, lexer ->
-      # dbg({ t, lexer })
       { lexer, token } = Lexer.next_token(lexer)
       assert token == t
 
