@@ -45,7 +45,7 @@ defmodule Monkeylang.Lexer do
     %__MODULE__{
       input: input,
       read_position: pos + 1,
-      position: lexer.position + 1,
+      position: lexer.position,
       ch: ch
     }
   end
