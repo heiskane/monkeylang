@@ -43,7 +43,8 @@ defmodule Monkeylang.Lexer2 do
   defp do_tokenize([char | tail], tokens) when is_letter(char) do
     {ident, rest} = read_ident(tail, char)
     token_type = Map.get(@keywords, ident, :ident)
-    do_tokenize(rest, [Token.new(token_type, ident) | tokens])
+    token = Token.new(token_type, ident)
+    do_tokenize(rest, [ token | tokens])
   end
 
   defp do_tokenize([char | tail], tokens) when is_digit(char) do
