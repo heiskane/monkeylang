@@ -48,7 +48,8 @@ defmodule Monkeylang.Lexer2 do
 
   defp do_tokenize([char | tail], tokens) when is_digit(char) do
     {number, rest} = read_number(tail, char)
-    do_tokenize(rest, [Token.new(:int, number) | tokens])
+    token = Token.new(:int, number)
+    do_tokenize(rest, [ token | tokens])
   end
 
   defp do_tokenize([char | tail], tokens) do
