@@ -11,8 +11,8 @@ input = """
 
 Benchee.run(%{
   "lexer1" => fn ->
-    Monkeylang.Lexer.new(input)
-    |> Monkeylang.Lexer.tokenize()
+    Monkeylang.LexerOld.new(input)
+    |> Monkeylang.LexerOld.tokenize()
   end,
-  "lexer2" => fn -> Monkeylang.Lexer2.tokenize(input) end,
+  "lexer2" => fn -> Monkeylang.Lexer.tokenize(input) end,
 })

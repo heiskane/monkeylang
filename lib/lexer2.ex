@@ -1,4 +1,4 @@
-defmodule Monkeylang.Lexer2 do
+defmodule Monkeylang.Lexer do
   alias Monkeylang.Token
 
   @keywords %{

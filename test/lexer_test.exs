@@ -2,13 +2,13 @@ defmodule LexerTest do
   use ExUnit.Case
   doctest Monkeylang.Lexer
 
+  alias Monkeylang.LexerOld
   alias Monkeylang.Lexer
-  alias Monkeylang.Lexer2
 
   test "test next_token" do
     input = "=+(){},;"
 
-    lexer = Lexer.new(input)
+    lexer = LexerOld.new(input)
 
     expected = [
       %Monkeylang.Token{type: :assign, literal: "="},
@@ -23,7 +23,7 @@ defmodule LexerTest do
     ]
 
     Enum.reduce_while(expected, lexer, fn t, lexer ->
-      { lexer, token } = Lexer.next_token(lexer)
+      { lexer, token } = LexerOld.next_token(lexer)
       assert token == t
 
       case token.type do
@@ -46,8 +46,8 @@ defmodule LexerTest do
     """
 
     tokens =
-      Lexer.new(input)
-      |> Lexer.tokenize()
+      LexerOld.new(input)
+      |> LexerOld.tokenize()
 
     expected = [
       %Monkeylang.Token{type: :ident, literal: "let"},
@@ -106,7 +106,7 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :eof, literal: ""},
     ]
 
-    tokens = Lexer2.tokenize(input)
+    tokens = Lexer.tokenize(input)
     |> dbg()
 
     assert tokens == expected
@@ -164,7 +164,7 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :eof, literal: ""}
     ]
 
-    tokens = Lexer2.tokenize(input)
+    tokens = Lexer.tokenize(input)
 
     assert tokens == expected
   end

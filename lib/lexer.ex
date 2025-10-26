@@ -1,4 +1,4 @@
-defmodule Monkeylang.Lexer do
+defmodule Monkeylang.LexerOld do
   defstruct [:input, position: 0, read_position: 0, ch: nil]
 
   alias Monkeylang.Token
