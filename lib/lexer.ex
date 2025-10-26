@@ -30,14 +30,12 @@ defmodule Monkeylang.Lexer do
   end
 
   # TODO: handle `==` and `!=`
-
   @spec tokenize(String.t()) :: list(Token.t())
   def tokenize(input) do
     String.graphemes(input)
     |> do_tokenize([])
   end
 
-  @spec do_tokenize(list(String.t()), list(Token.t)) :: list(Token.t())
   defp do_tokenize([], tokens),
     do: Enum.reverse([Token.new(:eof, "") | tokens])
 
