@@ -29,7 +29,6 @@ defmodule Monkeylang.Lexer do
     end
   end
 
-  # TODO: handle `==` and `!=`
   @spec tokenize(String.t()) :: list(Token.t())
   def tokenize(input) do
     String.graphemes(input)
@@ -62,6 +61,17 @@ defmodule Monkeylang.Lexer do
         do_tokenize(tl(tail), [ token | tokens ])
       _ ->
         token = Token.new(:assign, char)
+        do_tokenize(tail, [ token | tokens ])
+    end
+  end
+
+  defp do_tokenize([char | tail], tokens) when char == "!" do
+    case hd(tail) do
+      "=" ->
+        token = Token.new(:unequals, "!=")
+        do_tokenize(tl(tail), [ token | tokens ])
+      _ ->
+        token = Token.new(:not, char)
         do_tokenize(tail, [ token | tokens ])
     end
   end
