@@ -35,12 +35,15 @@ defmodule Monkeylang.Lexer do
     |> do_tokenize([])
   end
 
+  # handle eof
   defp do_tokenize([], tokens),
     do: Enum.reverse([Token.new(:eof, "") | tokens])
 
+  # skip whitespace
   defp do_tokenize([char | tail], tokens) when is_whitespace(char),
     do: do_tokenize(tail, tokens)
 
+  # handle identifiers
   defp do_tokenize([char | tail], tokens) when is_letter(char) do
     {ident, rest} = read_ident(tail, char)
     token_type = Map.get(@keywords, ident, :ident)
@@ -48,12 +51,14 @@ defmodule Monkeylang.Lexer do
     do_tokenize(rest, [token | tokens])
   end
 
+  # handle numbers
   defp do_tokenize([char | tail], tokens) when is_digit(char) do
     {number, rest} = read_number(tail, char)
     token = Token.new(:int, number)
     do_tokenize(rest, [token | tokens])
   end
 
+  # handle assign or equals
   defp do_tokenize([char = "=" | tail], tokens) do
     case hd(tail) do
       "=" ->
@@ -66,6 +71,7 @@ defmodule Monkeylang.Lexer do
     end
   end
 
+  # handle not equals or not
   defp do_tokenize([char = "!" | tail], tokens) do
     case hd(tail) do
       "=" ->
@@ -78,6 +84,7 @@ defmodule Monkeylang.Lexer do
     end
   end
 
+  # handle single charachter tokens
   defp do_tokenize([char | tail], tokens) do
     token =
       case char do
