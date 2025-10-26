@@ -16,7 +16,7 @@ defmodule Monkeylang.Token do
           | :assign
           | :int
           | :ident
-          | :not  # not sure it this will stay
+          | :not  # not sure if this will stay
 
   @type t :: %__MODULE__{
           type: token_type(),
