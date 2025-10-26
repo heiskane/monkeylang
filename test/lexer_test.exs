@@ -19,16 +19,16 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :rbrace, literal: "}"},
       %Monkeylang.Token{type: :comma, literal: ","},
       %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""},
+      %Monkeylang.Token{type: :eof, literal: ""}
     ]
 
     Enum.reduce_while(expected, lexer, fn t, lexer ->
-      { lexer, token } = LexerOld.next_token(lexer)
+      {lexer, token} = LexerOld.next_token(lexer)
       assert token == t
 
       case token.type do
-        :eof -> { :halt, lexer }
-        _ -> { :cont, lexer }
+        :eof -> {:halt, lexer}
+        _ -> {:cont, lexer}
       end
     end)
   end
@@ -94,6 +94,7 @@ defmodule LexerTest do
 
   test "test lexer2" do
     input = "=+(){},;"
+
     expected = [
       %Monkeylang.Token{type: :assign, literal: "="},
       %Monkeylang.Token{type: :plus, literal: "+"},
@@ -103,7 +104,7 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :rbrace, literal: "}"},
       %Monkeylang.Token{type: :comma, literal: ","},
       %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""},
+      %Monkeylang.Token{type: :eof, literal: ""}
     ]
 
     tokens = Lexer.tokenize(input)
@@ -175,6 +176,7 @@ defmodule LexerTest do
     """
 
     tokens = Lexer.tokenize(input)
+
     expected = [
       %Monkeylang.Token{type: :ident, literal: "a"},
       %Monkeylang.Token{type: :equals, literal: "=="},

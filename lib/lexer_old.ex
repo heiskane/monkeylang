@@ -68,7 +68,7 @@ defmodule Monkeylang.LexerOld do
           {lexer, identifier} = read_identifier(lexer)
           token_type = Map.get(@keywords, identifier, :ident)
           {lexer, Token.new(token_type, identifier)}
-        is_digit(lexer.ch) -> ""
+        is_digit(lexer.ch) ->
           {lexer, number} = read_number(lexer)
           {lexer, Token.new(:int, number)}
         true -> { read_char(lexer), Token.new(:illegal, lexer.ch) }
