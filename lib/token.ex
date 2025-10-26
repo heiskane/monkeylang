@@ -24,7 +24,6 @@ defmodule Monkeylang.Token do
 
   # This is not enforced anyway so keep it an atom
   @type token_type :: atom()
-
   @type t :: %__MODULE__{
           type: token_type(),
           literal: String.t()

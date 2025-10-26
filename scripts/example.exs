@@ -15,4 +15,4 @@ input = """
 
 tokens = Monkeylang.Lexer.tokenize(input)
 
-dbg(tokens)
+dbg(tokens, limit: :infinity)
