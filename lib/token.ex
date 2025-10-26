@@ -31,12 +31,12 @@ defmodule Monkeylang.Token do
         }
 
   @spec new(token_type(), String.t()) :: t()
-  def new(type, _literal) when type not in @token_types do
-    raise ArgumentError,
-          "Invalid token type: #{inspect(type)}. Allowed types: #{@token_types |> Enum.join(", ")}"
+  def new(type, literal) when type in @token_types do
+    %__MODULE__{type: type, literal: literal}
   end
 
-  def new(type, literal) do
-    %__MODULE__{type: type, literal: literal}
+  def new(type, _literal) do
+    raise ArgumentError,
+          "Invalid token type: #{inspect(type)}. Allowed types: #{@token_types |> Enum.join(", ")}"
   end
 end
