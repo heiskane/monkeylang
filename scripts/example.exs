@@ -7,10 +7,12 @@ input = """
   };
 
   let result = add(five, ten);
+
+  five != ten;
+  five == 5;
+  ten == 10;
 """
 
-tokens =
-  Monkeylang.Lexer.new(input)
-  |> Monkeylang.Lexer.tokenize()
+tokens = Monkeylang.Lexer.tokenize(input)
 
 dbg(tokens)
