@@ -107,7 +107,7 @@ defmodule LexerTest do
     ]
 
     tokens = Lexer.tokenize(input)
-    |> dbg()
+    # |> dbg()
 
     assert tokens == expected
   end
@@ -165,6 +165,23 @@ defmodule LexerTest do
     ]
 
     tokens = Lexer.tokenize(input)
+
+    assert tokens == expected
+  end
+
+  test "test equals" do
+    input = """
+      a == b;
+    """
+
+    tokens = Lexer.tokenize(input)
+    expected = [
+      %Monkeylang.Token{type: :ident, literal: "a"},
+      %Monkeylang.Token{type: :equals, literal: "=="},
+      %Monkeylang.Token{type: :ident, literal: "b"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :eof, literal: ""}
+    ]
 
     assert tokens == expected
   end

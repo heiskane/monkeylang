@@ -55,10 +55,20 @@ defmodule Monkeylang.Lexer do
     do_tokenize(rest, [ token | tokens])
   end
 
+  defp do_tokenize([char | tail], tokens) when char == "=" do
+    case hd(tail) do
+      "=" ->
+        token = Token.new(:equals, "==")
+        do_tokenize(tl(tail), [ token | tokens ])
+      _ ->
+        token = Token.new(:assign, char)
+        do_tokenize(tail, [ token | tokens ])
+    end
+  end
+
   defp do_tokenize([char | tail], tokens) do
     token =
       case char do
-        "=" -> Token.new(:assign, char)
         "+" -> Token.new(:plus, char)
         "(" -> Token.new(:lparen, char)
         ")" -> Token.new(:rparen, char)
