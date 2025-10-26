@@ -2,8 +2,8 @@ defmodule Monkeylang.Lexer do
   alias Monkeylang.Token
 
   @keywords %{
-    fn: :function,
-    let: :let
+    "fn" => :function,
+    "let" => :let
   }
 
   defmacro is_digit(ch) do
