@@ -12,6 +12,7 @@ defmodule Mix.Tasks.Check do
   def run(_args) do
     if dialyzer_installed?() do
       Mix.shell().info([:cyan, "===> Running Dialyzer..."])
+
       case Mix.Task.run("dialyzer", []) do
         :ok -> :ok
         _ -> raise "Dialyzer failed"
@@ -30,6 +31,7 @@ defmodule Mix.Tasks.Check do
 
   defp dialyzer_installed? do
     deps = Mix.Project.config()[:deps] || []
+
     Enum.any?(deps, fn
       {:dialyxir, _, _} -> true
       _ -> false
