@@ -72,11 +72,11 @@ defmodule Monkeylang.Lexer do
   end
 
   # handle not equals or not
-  defp do_tokenize([char = "!" | tail], tokens) do
-    case hd(tail) do
+  defp do_tokenize([char = "!" | tail = [ next | next_tail]], tokens) do
+    case next do
       "=" ->
         token = Token.new(:unequals, "!=")
-        do_tokenize(tl(tail), [token | tokens])
+        do_tokenize(next_tail, [token | tokens])
 
       _ ->
         token = Token.new(:not, char)
