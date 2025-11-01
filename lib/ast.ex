@@ -17,3 +17,13 @@ defmodule Monkeylang.AST.Let do
     value: term(),
   }
 end
+
+defmodule Monkeylang.AST.Return do
+  @enforce_keys [:token, :value]
+  defstruct [:token, :value]
+
+  @type t :: %__MODULE__{
+    token: Monkeylang.Token.t(),
+    value: term(),
+  }
+end

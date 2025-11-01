@@ -1,4 +1,6 @@
 input = """
+  return 1 + 2;
+
   let five = 5;
   let ten = 10;
 
@@ -13,6 +15,7 @@ input = """
   ten == 10;
 
   let 5 5;
+
 """
 
 tokens = Monkeylang.Lexer.tokenize(input)

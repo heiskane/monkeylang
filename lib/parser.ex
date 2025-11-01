@@ -14,8 +14,22 @@ defmodule Monkeylang.Parser do
     do_parse_tokens(rest, [node | statements], errors)
   end
 
+  defp do_parse_tokens(tokens = [%Token{type: :return} | _], statements, errors) do
+    {node, rest, errors} = handle_return(tokens, errors)
+    do_parse_tokens(rest, [node | statements], errors)
+  end
+
   defp do_parse_tokens([_head | tail], statements, errors) do
     do_parse_tokens(tail, statements, errors)
+  end
+
+  defp handle_return([token = %Token{type: :return} | tail], errors) do
+    node = %Monkeylang.AST.Return{token: token, value: "todo"}
+    tail =
+      Enum.split_while(tail, &(&1.type != :semicolon))
+      |> elem(1)
+      |> tl()
+    {node, tail, errors}
   end
 
   defp handle_let(
@@ -43,7 +57,7 @@ defmodule Monkeylang.Parser do
   end
 
   defp handle_let([%Token{type: :let} | tail], errors) do
-    # TODO: utilize `with` statements to make this nice
+    # TODO: utilize `with` statements to make this nice?
     message =
       cond do
         length(tail) < 3 -> "not enough tokens for a let statement"
