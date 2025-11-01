@@ -19,7 +19,12 @@ defmodule Monkeylang.Token do
     :ident,
     :let,
     :function,
-    :bang
+    :bang,
+    :minus,
+    :slash,
+    :asterisk,
+    :lt,
+    :gt
   ]
 
   # This is not enforced anyway so keep it an atom

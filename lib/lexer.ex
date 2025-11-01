@@ -3,7 +3,12 @@ defmodule Monkeylang.Lexer do
 
   @keywords %{
     "fn" => :function,
-    "let" => :let
+    "let" => :let,
+    "true" => :true,
+    "false" => :false,
+    "if" => :if,
+    "else" => :else,
+    "return" => :return,
   }
 
   defmacro is_digit(ch) do
@@ -84,6 +89,11 @@ defmodule Monkeylang.Lexer do
         "}" -> Token.new(:rbrace, char)
         "," -> Token.new(:comma, char)
         ";" -> Token.new(:semicolon, char)
+        "-" -> Token.new(:minus, char)
+        "/" -> Token.new(:slash, char)
+        "<" -> Token.new(:lt, char)
+        ">" -> Token.new(:gt, char)
+        "*" -> Token.new(:asterisk, char)
         "" -> Token.new(:eof, char)
         _ -> Token.new(:illegal, char)
       end

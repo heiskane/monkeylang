@@ -207,4 +207,29 @@ defmodule LexerTest do
 
     assert Lexer.tokenize(input) == expected
   end
+
+  test "test chapter 1.4" do
+    input = """
+      !-/*5;
+      5 < 10 > 5;
+    """
+
+    expected = [
+      %Monkeylang.Token{type: :bang, literal: "!"},
+      %Monkeylang.Token{type: :minus, literal: "-"},
+      %Monkeylang.Token{type: :slash, literal: "/"},
+      %Monkeylang.Token{type: :asterisk, literal: "*"},
+      %Monkeylang.Token{type: :int, literal: "5"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :int, literal: "5"},
+      %Monkeylang.Token{type: :lt, literal: "<"},
+      %Monkeylang.Token{type: :int, literal: "10"},
+      %Monkeylang.Token{type: :gt, literal: ">"},
+      %Monkeylang.Token{type: :int, literal: "5"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :eof, literal: ""}
+    ]
+
+    assert Lexer.tokenize(input) == expected
+  end
 end
