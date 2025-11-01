@@ -19,6 +19,7 @@ defmodule Monkeylang.Parser do
     do_parse_tokens(rest, [node | statements], errors)
   end
 
+  # default
   defp do_parse_tokens([_head | tail], statements, errors) do
     do_parse_tokens(tail, statements, errors)
   end

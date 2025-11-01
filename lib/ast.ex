@@ -12,10 +12,10 @@ defmodule Monkeylang.AST.Let do
   defstruct [:token, :name, :value]
 
   @type t :: %__MODULE__{
-    token: Monkeylang.Token.t(),
-    name: term(),
-    value: term(),
-  }
+          token: Monkeylang.Token.t(),
+          name: term(),
+          value: term()
+        }
 end
 
 defmodule Monkeylang.AST.Return do
@@ -23,7 +23,7 @@ defmodule Monkeylang.AST.Return do
   defstruct [:token, :value]
 
   @type t :: %__MODULE__{
-    token: Monkeylang.Token.t(),
-    value: term(),
-  }
+          token: Monkeylang.Token.t(),
+          value: term()
+        }
 end
