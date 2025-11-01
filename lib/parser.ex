@@ -19,25 +19,27 @@ defmodule Monkeylang.Parser do
     do_parse_tokens(rest, [node | statements], errors)
   end
 
+  # semicolons are optional lol
+  defp do_parse_tokens([%Token{type: :semicolon} | tail], statements, errors),
+    do: do_parse_tokens(tail, statements, errors)
+
   # default
   defp do_parse_tokens([token | tail], statements, errors) do
-    # TODO: Parse expression
     {expression, errors} =
-      parse_expression(token, :infix, errors)
+      parse_expression(token, :prefix, errors)
       |> dbg()
 
     do_parse_tokens(tail, [expression | statements], errors)
   end
 
-  defp parse_expression(token = %Token{type: :ident}, :infix, errors),
+  defp parse_expression(token = %Token{type: :ident}, :prefix, errors),
     do: {%Monkeylang.AST.Ident{token: token, value: token.literal}, errors}
 
-  defp parse_expression(token = %Token{type: :int}, :infix, errors),
-    # TODO: error handling
+  defp parse_expression(token = %Token{type: :int}, :prefix, errors),
     do: {%Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}, errors}
 
-  defp parse_expression(token, typ, errors) do
-    {nil, errors}
+  defp parse_expression(token, type, errors) do
+    {nil, ["no implementation for #{token.type} - #{type}" | errors]}
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do

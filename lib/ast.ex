@@ -47,3 +47,14 @@ defmodule Monkeylang.AST.Integer do
           value: Integer.t()
         }
 end
+
+defmodule Monkeylang.AST.PrefixExpression do
+  @enforce_keys [:token, :operator, :right]
+  defstruct [:token, :operator, :right]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          operator: term(),
+          right: term()
+        }
+end
