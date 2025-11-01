@@ -20,16 +20,34 @@ defmodule Monkeylang.Parser do
   end
 
   # default
-  defp do_parse_tokens([_head | tail], statements, errors) do
-    do_parse_tokens(tail, statements, errors)
+  defp do_parse_tokens([token | tail], statements, errors) do
+    # TODO: Parse expression
+    {expression, errors} =
+      parse_expression(token, :infix, errors)
+      |> dbg()
+
+    do_parse_tokens(tail, [expression | statements], errors)
+  end
+
+  defp parse_expression(token = %Token{type: :ident}, :infix, errors),
+    do: {%Monkeylang.AST.Ident{token: token, value: token.literal}, errors}
+
+  defp parse_expression(token = %Token{type: :int}, :infix, errors),
+    # TODO: error handling
+    do: {%Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}, errors}
+
+  defp parse_expression(token, typ, errors) do
+    {nil, errors}
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
     node = %Monkeylang.AST.Return{token: token, value: "todo"}
+
     tail =
       Enum.split_while(tail, &(&1.type != :semicolon))
       |> elem(1)
       |> tl()
+
     {node, tail, errors}
   end
 

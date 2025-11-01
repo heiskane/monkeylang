@@ -27,3 +27,23 @@ defmodule Monkeylang.AST.Return do
           value: term()
         }
 end
+
+defmodule Monkeylang.AST.Ident do
+  @enforce_keys [:token, :value]
+  defstruct [:token, :value]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          value: String.t()
+        }
+end
+
+defmodule Monkeylang.AST.Integer do
+  @enforce_keys [:token, :value]
+  defstruct [:token, :value]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          value: Integer.t()
+        }
+end
