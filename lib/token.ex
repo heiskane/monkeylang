@@ -12,7 +12,7 @@ defmodule Monkeylang.Token do
     :rbrace,
     :comma,
     :semicolon,
-    :unequals,
+    :notequals,
     :equals,
     :assign,
     :int,

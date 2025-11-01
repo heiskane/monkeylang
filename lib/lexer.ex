@@ -73,7 +73,7 @@ defmodule Monkeylang.Lexer do
 
   # handle not equals or not
   defp do_tokenize(["!" | ["=" | next_tail]], tokens),
-    do: do_tokenize(next_tail, [Token.new(:unequals, "!=") | tokens])
+    do: do_tokenize(next_tail, [Token.new(:notequals, "!=") | tokens])
 
   defp do_tokenize(["!" | tail], tokens),
     do: do_tokenize(tail, [Token.new(:bang, "!") | tokens])

@@ -188,7 +188,7 @@ defmodule LexerTest do
     assert tokens == expected
   end
 
-  test "test unequals" do
+  test "test notequals" do
     input = """
       a != b;
       !a;
@@ -196,7 +196,7 @@ defmodule LexerTest do
 
     expected = [
       %Monkeylang.Token{type: :ident, literal: "a"},
-      %Monkeylang.Token{type: :unequals, literal: "!="},
+      %Monkeylang.Token{type: :notequals, literal: "!="},
       %Monkeylang.Token{type: :ident, literal: "b"},
       %Monkeylang.Token{type: :semicolon, literal: ";"},
       %Monkeylang.Token{type: :bang, literal: "!"},
