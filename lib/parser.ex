@@ -24,13 +24,13 @@ defmodule Monkeylang.Parser do
     do: do_parse_tokens(tail, statements, errors)
 
   # default
-  defp do_parse_tokens(tokens, statements, errors) do
+  defp do_parse_tokens([_head | tail], statements, errors) do
     # TODO: add precedence
-    {rest, expression, errors} =
-      parse_expression(tokens, :prefix, errors)
-      |> dbg()
+    # {rest, expression, errors} =
+    #   parse_expression(tokens, :prefix, errors)
+    #   |> dbg()
 
-    do_parse_tokens(rest, [expression | statements], errors)
+    do_parse_tokens(tail, statements, errors)
   end
 
   defp parse_expression(tokens = [token = %Token{type: :ident} | _tail], :prefix, errors),

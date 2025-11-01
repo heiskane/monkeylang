@@ -23,8 +23,8 @@ input2 = """
   -15;
 """
 
-tokens = Monkeylang.Lexer.tokenize(input2)
-# |> dbg(limit: :infinity)
+tokens = Monkeylang.Lexer.tokenize(input)
+|> dbg(limit: :infinity)
 
 Monkeylang.Parser.parse_tokens(tokens)
 |> dbg()
