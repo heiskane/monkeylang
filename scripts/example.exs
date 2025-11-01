@@ -14,5 +14,7 @@ input = """
 """
 
 tokens = Monkeylang.Lexer.tokenize(input)
+# |> dbg(limit: :infinity)
 
-dbg(tokens, limit: :infinity)
+Monkeylang.Parser.parse_tokens(tokens)
+|> dbg()
