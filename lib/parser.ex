@@ -24,22 +24,46 @@ defmodule Monkeylang.Parser do
     do: do_parse_tokens(tail, statements, errors)
 
   # default
-  defp do_parse_tokens([token | tail], statements, errors) do
-    {expression, errors} =
-      parse_expression(token, :prefix, errors)
+  defp do_parse_tokens(tokens, statements, errors) do
+    # TODO: add precedence
+    {rest, expression, errors} =
+      parse_expression(tokens, :prefix, errors)
       |> dbg()
 
-    do_parse_tokens(tail, [expression | statements], errors)
+    do_parse_tokens(rest, [expression | statements], errors)
   end
 
-  defp parse_expression(token = %Token{type: :ident}, :prefix, errors),
-    do: {%Monkeylang.AST.Ident{token: token, value: token.literal}, errors}
+  defp parse_expression(tokens = [token = %Token{type: :ident} | _tail], :prefix, errors),
+    do: {
+      tokens,
+      %Monkeylang.AST.Ident{token: token, value: token.literal},
+      errors
+    }
 
-  defp parse_expression(token = %Token{type: :int}, :prefix, errors),
-    do: {%Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}, errors}
+  defp parse_expression(tokens = [token = %Token{type: :int} | _tail], :prefix, errors),
+    do: {
+      tokens,
+      %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)},
+      errors
+    }
 
-  defp parse_expression(token, type, errors) do
-    {nil, ["no implementation for #{token.type} - #{type}" | errors]}
+  defp parse_expression([token | tail], :prefix, errors)
+       when token.type in [:bang, :minus] do
+    next_expression = parse_expression(tail, :prefix, errors)
+
+    {
+      tail,
+      %Monkeylang.AST.PrefixExpression{
+        token: token,
+        operator: token.literal,
+        right: next_expression
+      },
+      errors
+    }
+  end
+
+  defp parse_expression(tokens = [token | _], type, errors) do
+    {tokens, nil, ["no implementation for #{token.type} - #{type}" | errors]}
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
