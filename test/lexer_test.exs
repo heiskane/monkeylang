@@ -199,7 +199,7 @@ defmodule LexerTest do
       %Monkeylang.Token{type: :unequals, literal: "!="},
       %Monkeylang.Token{type: :ident, literal: "b"},
       %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :not, literal: "!"},
+      %Monkeylang.Token{type: :bang, literal: "!"},
       %Monkeylang.Token{type: :ident, literal: "a"},
       %Monkeylang.Token{type: :semicolon, literal: ";"},
       %Monkeylang.Token{type: :eof, literal: ""}

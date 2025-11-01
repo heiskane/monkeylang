@@ -71,7 +71,7 @@ defmodule Monkeylang.Lexer do
     do: do_tokenize(next_tail, [Token.new(:unequals, "!=") | tokens])
 
   defp do_tokenize(["!" | tail], tokens),
-    do: do_tokenize(tail, [Token.new(:not, "!") | tokens])
+    do: do_tokenize(tail, [Token.new(:bang, "!") | tokens])
 
   # handle single charachter tokens
   defp do_tokenize([char | tail], tokens) do

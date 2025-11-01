@@ -19,7 +19,7 @@ defmodule Monkeylang.Token do
     :ident,
     :let,
     :function,
-    :not
+    :bang
   ]
 
   # This is not enforced anyway so keep it an atom
