@@ -24,7 +24,12 @@ defmodule Monkeylang.Token do
     :slash,
     :asterisk,
     :lt,
-    :gt
+    :gt,
+    :true,
+    :false,
+    :if,
+    :else,
+    :return,
   ]
 
   # This is not enforced anyway so keep it an atom

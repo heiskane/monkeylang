@@ -232,4 +232,20 @@ defmodule LexerTest do
 
     assert Lexer.tokenize(input) == expected
   end
+  test "test keywords" do
+    input = """
+      let asdf = fn(a) { a + 1 };
+      if (5 < 10) {
+        return true;
+      } else {
+        return false;
+      }
+    """
+
+    expected = [
+      %Monkeylang.Token{type: :bang, literal: "!"},
+    ]
+
+    assert Lexer.tokenize(input) == expected
+  end
 end

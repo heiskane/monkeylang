@@ -4,11 +4,11 @@ defmodule Monkeylang.Lexer do
   @keywords %{
     "fn" => :function,
     "let" => :let,
-    "true" => :true,
-    "false" => :false,
+    "true" => true,
+    "false" => false,
     "if" => :if,
     "else" => :else,
-    "return" => :return,
+    "return" => :return
   }
 
   defmacro is_digit(ch) do
@@ -64,7 +64,7 @@ defmodule Monkeylang.Lexer do
   end
 
   # handle equals
-  defp do_tokenize(["=" | [ "=" | next_tail]], tokens),
+  defp do_tokenize(["=" | ["=" | next_tail]], tokens),
     do: do_tokenize(next_tail, [Token.new(:equals, "==") | tokens])
 
   # handle assign
@@ -72,7 +72,7 @@ defmodule Monkeylang.Lexer do
     do: do_tokenize(tail, [Token.new(:assign, "=") | tokens])
 
   # handle not equals or not
-  defp do_tokenize(["!" | [ "=" | next_tail]], tokens),
+  defp do_tokenize(["!" | ["=" | next_tail]], tokens),
     do: do_tokenize(next_tail, [Token.new(:unequals, "!=") | tokens])
 
   defp do_tokenize(["!" | tail], tokens),
