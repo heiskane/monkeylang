@@ -14,7 +14,7 @@ defmodule Monkeylang.Parser do
     do_parse_tokens(rest, [node | statements], errors)
   end
 
-  defp do_parse_tokens([head | tail], statements, errors) do
+  defp do_parse_tokens([_head | tail], statements, errors) do
     do_parse_tokens(tail, statements, errors)
   end
 
@@ -42,8 +42,23 @@ defmodule Monkeylang.Parser do
     {node, tail, errors}
   end
 
-  defp handle_let([_ | tail], errors) do
-    # TODO: add more descriptive error messages
-    {nil, tail, ["let is no good" | errors]}
+  defp handle_let([%Token{type: :let} | tail], errors) do
+    # TODO: utilize `with` statements to make this nice
+    message =
+      cond do
+        length(tail) < 3 -> "not enough tokens for a let statement"
+        (token = Enum.at(tail, 0)).type != :ident -> "expected identifier but got #{token.type}"
+        (token = Enum.at(tail, 1)).type != :assign -> "expected assign but got #{token.type}"
+      end
+
+    {nil, tail, [message | errors]}
   end
+
+  # Not sure about this
+  # defp expect_type(%Token{type: type}, expected) do
+  #   case type != expected do
+  #     True -> "expected #{expected} got #{type}"
+  #     False -> nil
+  #   end
+  # end
 end
