@@ -232,6 +232,7 @@ defmodule LexerTest do
 
     assert Lexer.tokenize(input) == expected
   end
+
   test "test keywords" do
     input = """
       let asdf = fn(a) { a + 1 };
@@ -243,7 +244,37 @@ defmodule LexerTest do
     """
 
     expected = [
-      %Monkeylang.Token{type: :bang, literal: "!"},
+      %Monkeylang.Token{type: :let, literal: "let"},
+      %Monkeylang.Token{type: :ident, literal: "asdf"},
+      %Monkeylang.Token{type: :assign, literal: "="},
+      %Monkeylang.Token{type: :function, literal: "fn"},
+      %Monkeylang.Token{type: :lparen, literal: "("},
+      %Monkeylang.Token{type: :ident, literal: "a"},
+      %Monkeylang.Token{type: :rparen, literal: ")"},
+      %Monkeylang.Token{type: :lbrace, literal: "{"},
+      %Monkeylang.Token{type: :ident, literal: "a"},
+      %Monkeylang.Token{type: :plus, literal: "+"},
+      %Monkeylang.Token{type: :int, literal: "1"},
+      %Monkeylang.Token{type: :rbrace, literal: "}"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :if, literal: "if"},
+      %Monkeylang.Token{type: :lparen, literal: "("},
+      %Monkeylang.Token{type: :int, literal: "5"},
+      %Monkeylang.Token{type: :lt, literal: "<"},
+      %Monkeylang.Token{type: :int, literal: "10"},
+      %Monkeylang.Token{type: :rparen, literal: ")"},
+      %Monkeylang.Token{type: :lbrace, literal: "{"},
+      %Monkeylang.Token{type: :return, literal: "return"},
+      %Monkeylang.Token{type: true, literal: "true"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :rbrace, literal: "}"},
+      %Monkeylang.Token{type: :else, literal: "else"},
+      %Monkeylang.Token{type: :lbrace, literal: "{"},
+      %Monkeylang.Token{type: :return, literal: "return"},
+      %Monkeylang.Token{type: false, literal: "false"},
+      %Monkeylang.Token{type: :semicolon, literal: ";"},
+      %Monkeylang.Token{type: :rbrace, literal: "}"},
+      %Monkeylang.Token{type: :eof, literal: ""}
     ]
 
     assert Lexer.tokenize(input) == expected
