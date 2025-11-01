@@ -58,31 +58,20 @@ defmodule Monkeylang.Lexer do
     do_tokenize(rest, [token | tokens])
   end
 
-  # handle assign or equals
-  defp do_tokenize([char = "=" | tail = [next | next_tail]], tokens) do
-    case next do
-      "=" ->
-        token = Token.new(:equals, "==")
-        do_tokenize(next_tail, [token | tokens])
+  # handle equals
+  defp do_tokenize(["=" | [ "=" | next_tail]], tokens),
+    do: do_tokenize(next_tail, [Token.new(:equals, "==") | tokens])
 
-      _ ->
-        token = Token.new(:assign, char)
-        do_tokenize(tail, [token | tokens])
-    end
-  end
+  # handle assign
+  defp do_tokenize(["=" | tail], tokens),
+    do: do_tokenize(tail, [Token.new(:assign, "=") | tokens])
 
   # handle not equals or not
-  defp do_tokenize([char = "!" | tail = [next | next_tail]], tokens) do
-    case next do
-      "=" ->
-        token = Token.new(:unequals, "!=")
-        do_tokenize(next_tail, [token | tokens])
+  defp do_tokenize(["!" | [ "=" | next_tail]], tokens),
+    do: do_tokenize(next_tail, [Token.new(:unequals, "!=") | tokens])
 
-      _ ->
-        token = Token.new(:not, char)
-        do_tokenize(tail, [token | tokens])
-    end
-  end
+  defp do_tokenize(["!" | tail], tokens),
+    do: do_tokenize(tail, [Token.new(:not, "!") | tokens])
 
   # handle single charachter tokens
   defp do_tokenize([char | tail], tokens) do
