@@ -26,8 +26,6 @@ defmodule Monkeylang.Parser do
     # TODO: lparen
   ]
 
-  defp get_precedence(type), do: Map.get(@precedences, type, 0)
-
   def parse_tokens(tokens), do: parse_statements(tokens, [], [])
 
   defp parse_statements([], statements, errors),
@@ -76,7 +74,8 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_prefix([%Token{type: :lparen} | tail], errors) do
-    {tokens = [_, next | _], expression, errors} = parse_expression(tail, 0, errors)
+    {tokens, expression, errors} = parse_expression(tail, 0, errors)
+    {next, _} = peek_token(tokens)
 
     case next.type do
       :rparen -> {tl(tokens), expression, errors}
@@ -100,7 +99,8 @@ defmodule Monkeylang.Parser do
        when next.type not in @infixable or not (precedence < next.precedence),
        do: {tokens, left, errors}
 
-  defp parse_infix([_, next | tail], left, precedence, errors) do
+  defp parse_infix(tokens, left, precedence, errors) do
+    {next, tail} = peek_token(tokens)
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
     infix = %Monkeylang.AST.InfixExpression{
@@ -159,6 +159,9 @@ defmodule Monkeylang.Parser do
 
     {nil, tail, [message | errors]}
   end
+
+  defp get_precedence(type), do: Map.get(@precedences, type, 0)
+  defp peek_token([_, next | tail]), do: {next, tail}
 
   # Not sure about this
   # defp expect_type(%Token{type: type}, expected) do
