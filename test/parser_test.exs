@@ -35,4 +35,18 @@ defmodule ParserTest do
 
     assert node == expected
   end
+
+  test "test booleans" do
+    input = """
+      3 < 5 == true;
+      true != false;
+    """
+
+    {[node | _], _errors} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> dbg()
+
+    IO.puts(node)
+  end
 end

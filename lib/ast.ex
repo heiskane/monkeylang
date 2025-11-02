@@ -38,6 +38,22 @@ defmodule Monkeylang.AST.Return do
         }
 end
 
+defmodule Monkeylang.AST.Boolean do
+  @enforce_keys [:token, :value]
+  defstruct [:token, :value]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          value: boolean()
+        }
+end
+
+defimpl String.Chars, for: Monkeylang.AST.Boolean do
+  def to_string(node = %Monkeylang.AST.Boolean{}) do
+    node.token.literal
+  end
+end
+
 defmodule Monkeylang.AST.Ident do
   @enforce_keys [:token, :value]
   defstruct [:token, :value]
@@ -95,6 +111,6 @@ end
 
 defimpl String.Chars, for: Monkeylang.AST.InfixExpression do
   def to_string(node = %Monkeylang.AST.InfixExpression{}) do
-    "(#{node.left}#{node.token.literal}#{node.right})"
+    "(#{node.left} #{node.token.literal} #{node.right})"
   end
 end

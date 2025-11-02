@@ -19,8 +19,8 @@ defmodule Monkeylang.Parser do
     :minus,
     :slash,
     :asterisk,
-    :eq,
-    :not_eq,
+    :equals,
+    :notequals,
     :lt,
     :gt
     # TODO: lparen
@@ -63,9 +63,15 @@ defmodule Monkeylang.Parser do
     {tokens, node, errors}
   end
 
-  defp parse_prefix([token = %Token{type: :minus} | tail], errors) do
-    {tokens, right, errors} = parse_expression(tail, get_precedence(:minus), errors)
+  defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
+    {tokens, right, errors} = parse_expression(tail, get_precedence(token.type), errors)
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
+    {tokens, node, errors}
+  end
+
+  defp parse_prefix(tokens = [token | _], errors)
+       when token.type in [true, false] do
+    node = %Monkeylang.AST.Boolean{token: token, value: token.type}
     {tokens, node, errors}
   end
 
