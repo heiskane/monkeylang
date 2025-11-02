@@ -54,7 +54,8 @@ defmodule Monkeylang.Parser do
   defp parse_statements(tokens, statements, errors) do
     {rest, expression, errors} =
       parse_expression(tokens, 0, errors)
-      # |> dbg()
+
+    # |> dbg()
 
     parse_statements(tl(rest), [expression | statements], errors)
     # |> dbg()
@@ -74,20 +75,19 @@ defmodule Monkeylang.Parser do
   @spec parse_expression(list(Token.t()), integer(), list(String.t())) ::
           {list(Token.t()), Token.t(), list(String.t())}
   defp parse_expression(tokens, precedence, errors) do
-    {tokens = [_, next | tail], left, errors} =
+    {tokens, left, errors} =
       parse_token(tokens, :prefix, errors)
-      # |> dbg()
 
     if is_nil(left) do
       {tokens, left, errors}
     else
       infix_loop(tokens, left, precedence, errors)
-      # |> dbg()
     end
   end
 
-  defp infix_loop(tokens = [curr, next | tail], left, precedence, errors) do
+  defp infix_loop(tokens = [_, next | tail], left, precedence, errors) do
     dbg({tokens, left, precedence})
+
     case {precedence < get_precedence(next.type), next.type in @infixable} do
       {false, _} ->
         {tokens, left, errors}
