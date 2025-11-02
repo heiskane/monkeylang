@@ -47,7 +47,6 @@ defmodule Monkeylang.Parser do
   end
 
   # semicolons are optional lol
-  # TODO: is this necessary?
   defp parse_statements([%Token{type: :semicolon} | tail], statements, errors),
     do: parse_statements(tail, statements, errors)
 
@@ -55,10 +54,7 @@ defmodule Monkeylang.Parser do
     {rest, expression, errors} =
       parse_expression(tokens, 0, errors)
 
-    # |> dbg()
-
     parse_statements(tl(rest), [expression | statements], errors)
-    # |> dbg()
   end
 
   # TODO: this is really just `parse_prefix`
@@ -78,37 +74,33 @@ defmodule Monkeylang.Parser do
     {tokens, left, errors} =
       parse_token(tokens, :prefix, errors)
 
-    if is_nil(left) do
-      {tokens, left, errors}
-    else
-      infix_loop(tokens, left, precedence, errors)
-    end
+    infix_loop(tokens, left, precedence, errors)
   end
+
+  defp infix_loop(tokens, nil, _precedence, errors),
+    do: {tokens, nil, errors}
 
   defp infix_loop(tokens = [_, next | _], left, _precedence, errors)
        when next.type not in @infixable,
        do: {tokens, left, errors}
 
-  defp infix_loop(tokens = [_, next | tail], left, precedence, errors) do
-    dbg({tokens, left, precedence})
+  defp infix_loop(tokens = [_, next | _], left, precedence, errors)
+       when not (precedence < next.precedence),
+       do: {tokens, left, errors}
 
-    case precedence < get_precedence(next.type) do
-      false ->
-        {tokens, left, errors}
+  defp infix_loop([_, next | tail], left, precedence, errors) do
+    # TODO: handle :lparen
 
-      true ->
-        # TODO: handle :lparen
-        {tokens, right, errors} = parse_expression(tail, get_precedence(next.type), errors)
+    {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
-        infix = %Monkeylang.AST.InfixExpression{
-          token: next,
-          operator: next.literal,
-          left: left,
-          right: right
-        }
+    infix = %Monkeylang.AST.InfixExpression{
+      token: next,
+      operator: next.literal,
+      left: left,
+      right: right
+    }
 
-        infix_loop(tokens, infix, precedence, errors)
-    end
+    infix_loop(tokens, infix, precedence, errors)
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do

@@ -13,22 +13,22 @@ defmodule ParserTest do
       |> dbg()
 
     expected = %Monkeylang.AST.InfixExpression{
-      token: %Monkeylang.Token{type: :plus, literal: "+"},
+      token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
       operator: "+",
       left: %Monkeylang.AST.InfixExpression{
-        token: %Monkeylang.Token{type: :plus, literal: "+"},
+        token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
         operator: "+",
         left: %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "1"},
+          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
           value: 1
         },
         right: %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "2"},
+          token: %Monkeylang.Token{type: :int, literal: "2", precedence: 0},
           value: 2
         }
       },
       right: %Monkeylang.AST.Integer{
-        token: %Monkeylang.Token{type: :int, literal: "3"},
+        token: %Monkeylang.Token{type: :int, literal: "3", precedence: 0},
         value: 3
       }
     }
