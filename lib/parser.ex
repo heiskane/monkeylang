@@ -57,29 +57,23 @@ defmodule Monkeylang.Parser do
     parse_statements(tl(rest), [expression | statements], errors)
   end
 
-  # TODO: this is really just `parse_prefix`
-  defp parse_token(tokens = [token = %Token{type: :int} | _], :prefix, errors) do
+  defp parse_prefix(tokens = [token = %Token{type: :int} | _], errors) do
     node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
     {tokens, node, errors}
   end
 
-  defp parse_token([token = %Token{type: :minus} | tail], :prefix, errors) do
+  defp parse_prefix([token = %Token{type: :minus} | tail], errors) do
     {tokens, right, errors} = parse_expression(tail, 6, errors)
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
     {tokens, node, errors}
   end
 
-  defp parse_token(tokens = [token | _], type, errors) do
-    IO.puts("cant parse token #{token.type} as #{type}")
-    {tokens, nil, errors}
+  defp parse_prefix(tokens = [token | _], errors) do
+    {tokens, nil, ["cant parse prefix #{token.type}" | errors]}
   end
 
-  @spec parse_expression(list(Token.t()), integer(), list(String.t())) ::
-          {list(Token.t()), Token.t(), list(String.t())}
   defp parse_expression(tokens, precedence, errors) do
-    {tokens, left, errors} =
-      parse_token(tokens, :prefix, errors)
-
+    {tokens, left, errors} = parse_prefix(tokens, errors)
     infix_loop(tokens, left, precedence, errors)
   end
 
