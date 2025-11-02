@@ -2,113 +2,25 @@ defmodule LexerTest do
   use ExUnit.Case
   doctest Monkeylang.Lexer
 
-  alias Monkeylang.LexerOld
   alias Monkeylang.Lexer
-
-  test "test next_token" do
-    input = "=+(){},;"
-
-    lexer = LexerOld.new(input)
-
-    expected = [
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :plus, literal: "+"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :comma, literal: ","},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
-    ]
-
-    Enum.reduce_while(expected, lexer, fn t, lexer ->
-      {lexer, token} = LexerOld.next_token(lexer)
-      assert token == t
-
-      case token.type do
-        :eof -> {:halt, lexer}
-        _ -> {:cont, lexer}
-      end
-    end)
-  end
-
-  test "parse code block" do
-    input = """
-      let five = 5;
-      let ten = 10;
-
-      let add = fn(x, y) {
-        x + y;
-      };
-
-      let result = add(five, ten);
-    """
-
-    tokens =
-      LexerOld.new(input)
-      |> LexerOld.tokenize()
-
-    expected = [
-      %Monkeylang.Token{type: :ident, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "five"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :int, literal: "5"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :ident, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "ten"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :int, literal: "10"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :ident, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "add"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :ident, literal: "fn"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :ident, literal: "x"},
-      %Monkeylang.Token{type: :comma, literal: ","},
-      %Monkeylang.Token{type: :ident, literal: "y"},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :ident, literal: "x"},
-      %Monkeylang.Token{type: :plus, literal: "+"},
-      %Monkeylang.Token{type: :ident, literal: "y"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :ident, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "result"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :ident, literal: "add"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :ident, literal: "five"},
-      %Monkeylang.Token{type: :comma, literal: ","},
-      %Monkeylang.Token{type: :ident, literal: "ten"},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
-    ]
-
-    assert tokens == expected
-  end
 
   test "test lexer2" do
     input = "=+(){},;"
 
-    expected = [
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :plus, literal: "+"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :comma, literal: ","},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
-    ]
+    tokens =
+      Lexer.tokenize(input)
 
-    tokens = Lexer.tokenize(input)
-    # |> dbg()
+    expected = [
+      %Monkeylang.Token{type: :assign, literal: "=", precedence: 0},
+      %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+      %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+      %Monkeylang.Token{type: :rparen, literal: ")", precedence: 0},
+      %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+      %Monkeylang.Token{type: :rbrace, literal: "}", precedence: 0},
+      %Monkeylang.Token{type: :comma, literal: ",", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :eof, literal: "", precedence: 0}
+    ]
 
     assert tokens == expected
   end
@@ -125,47 +37,48 @@ defmodule LexerTest do
       let result = add(five, ten);
     """
 
-    expected = [
-      %Monkeylang.Token{type: :let, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "five"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :int, literal: "5"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :let, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "ten"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :int, literal: "10"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :let, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "add"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :function, literal: "fn"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :ident, literal: "x"},
-      %Monkeylang.Token{type: :comma, literal: ","},
-      %Monkeylang.Token{type: :ident, literal: "y"},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :ident, literal: "x"},
-      %Monkeylang.Token{type: :plus, literal: "+"},
-      %Monkeylang.Token{type: :ident, literal: "y"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :let, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "result"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :ident, literal: "add"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :ident, literal: "five"},
-      %Monkeylang.Token{type: :comma, literal: ","},
-      %Monkeylang.Token{type: :ident, literal: "ten"},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
-    ]
+    tokens =
+      Lexer.tokenize(input)
 
-    tokens = Lexer.tokenize(input)
+    expected = [
+      %Monkeylang.Token{type: :let, literal: "let", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "five", precedence: 0},
+      %Monkeylang.Token{type: :assign, literal: "=", precedence: 0},
+      %Monkeylang.Token{type: :int, literal: "5", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :let, literal: "let", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "ten", precedence: 0},
+      %Monkeylang.Token{type: :assign, literal: "=", precedence: 0},
+      %Monkeylang.Token{type: :int, literal: "10", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :let, literal: "let", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "add", precedence: 0},
+      %Monkeylang.Token{type: :assign, literal: "=", precedence: 0},
+      %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
+      %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+      %Monkeylang.Token{type: :ident, literal: "x", precedence: 0},
+      %Monkeylang.Token{type: :comma, literal: ",", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "y", precedence: 0},
+      %Monkeylang.Token{type: :rparen, literal: ")", precedence: 0},
+      %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "x", precedence: 0},
+      %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+      %Monkeylang.Token{type: :ident, literal: "y", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :rbrace, literal: "}", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :let, literal: "let", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "result", precedence: 0},
+      %Monkeylang.Token{type: :assign, literal: "=", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "add", precedence: 0},
+      %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+      %Monkeylang.Token{type: :ident, literal: "five", precedence: 0},
+      %Monkeylang.Token{type: :comma, literal: ",", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "ten", precedence: 0},
+      %Monkeylang.Token{type: :rparen, literal: ")", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :eof, literal: "", precedence: 0}
+    ]
 
     assert tokens == expected
   end
@@ -175,14 +88,15 @@ defmodule LexerTest do
       a == b;
     """
 
-    tokens = Lexer.tokenize(input)
+    tokens =
+      Lexer.tokenize(input)
 
     expected = [
-      %Monkeylang.Token{type: :ident, literal: "a"},
-      %Monkeylang.Token{type: :equals, literal: "=="},
-      %Monkeylang.Token{type: :ident, literal: "b"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
+      %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+      %Monkeylang.Token{type: :equals, literal: "==", precedence: 1},
+      %Monkeylang.Token{type: :ident, literal: "b", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :eof, literal: "", precedence: 0}
     ]
 
     assert tokens == expected
@@ -195,14 +109,14 @@ defmodule LexerTest do
     """
 
     expected = [
-      %Monkeylang.Token{type: :ident, literal: "a"},
-      %Monkeylang.Token{type: :notequals, literal: "!="},
-      %Monkeylang.Token{type: :ident, literal: "b"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :bang, literal: "!"},
-      %Monkeylang.Token{type: :ident, literal: "a"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
+      %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+      %Monkeylang.Token{type: :notequals, literal: "!=", precedence: 1},
+      %Monkeylang.Token{type: :ident, literal: "b", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :bang, literal: "!", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :eof, literal: "", precedence: 0}
     ]
 
     assert Lexer.tokenize(input) == expected
@@ -215,19 +129,19 @@ defmodule LexerTest do
     """
 
     expected = [
-      %Monkeylang.Token{type: :bang, literal: "!"},
-      %Monkeylang.Token{type: :minus, literal: "-"},
-      %Monkeylang.Token{type: :slash, literal: "/"},
-      %Monkeylang.Token{type: :asterisk, literal: "*"},
-      %Monkeylang.Token{type: :int, literal: "5"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :int, literal: "5"},
-      %Monkeylang.Token{type: :lt, literal: "<"},
-      %Monkeylang.Token{type: :int, literal: "10"},
-      %Monkeylang.Token{type: :gt, literal: ">"},
-      %Monkeylang.Token{type: :int, literal: "5"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :eof, literal: ""}
+      %Monkeylang.Token{type: :bang, literal: "!", precedence: 0},
+      %Monkeylang.Token{type: :minus, literal: "-", precedence: 3},
+      %Monkeylang.Token{type: :slash, literal: "/", precedence: 4},
+      %Monkeylang.Token{type: :asterisk, literal: "*", precedence: 4},
+      %Monkeylang.Token{type: :int, literal: "5", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :int, literal: "5", precedence: 0},
+      %Monkeylang.Token{type: :lt, literal: "<", precedence: 2},
+      %Monkeylang.Token{type: :int, literal: "10", precedence: 0},
+      %Monkeylang.Token{type: :gt, literal: ">", precedence: 2},
+      %Monkeylang.Token{type: :int, literal: "5", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :eof, literal: "", precedence: 0}
     ]
 
     assert Lexer.tokenize(input) == expected
@@ -244,37 +158,37 @@ defmodule LexerTest do
     """
 
     expected = [
-      %Monkeylang.Token{type: :let, literal: "let"},
-      %Monkeylang.Token{type: :ident, literal: "asdf"},
-      %Monkeylang.Token{type: :assign, literal: "="},
-      %Monkeylang.Token{type: :function, literal: "fn"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :ident, literal: "a"},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :ident, literal: "a"},
-      %Monkeylang.Token{type: :plus, literal: "+"},
-      %Monkeylang.Token{type: :int, literal: "1"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :if, literal: "if"},
-      %Monkeylang.Token{type: :lparen, literal: "("},
-      %Monkeylang.Token{type: :int, literal: "5"},
-      %Monkeylang.Token{type: :lt, literal: "<"},
-      %Monkeylang.Token{type: :int, literal: "10"},
-      %Monkeylang.Token{type: :rparen, literal: ")"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :return, literal: "return"},
-      %Monkeylang.Token{type: true, literal: "true"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :else, literal: "else"},
-      %Monkeylang.Token{type: :lbrace, literal: "{"},
-      %Monkeylang.Token{type: :return, literal: "return"},
-      %Monkeylang.Token{type: false, literal: "false"},
-      %Monkeylang.Token{type: :semicolon, literal: ";"},
-      %Monkeylang.Token{type: :rbrace, literal: "}"},
-      %Monkeylang.Token{type: :eof, literal: ""}
+      %Monkeylang.Token{type: :let, literal: "let", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "asdf", precedence: 0},
+      %Monkeylang.Token{type: :assign, literal: "=", precedence: 0},
+      %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
+      %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+      %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+      %Monkeylang.Token{type: :rparen, literal: ")", precedence: 0},
+      %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+      %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+      %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+      %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+      %Monkeylang.Token{type: :rbrace, literal: "}", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :if, literal: "if", precedence: 0},
+      %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+      %Monkeylang.Token{type: :int, literal: "5", precedence: 0},
+      %Monkeylang.Token{type: :lt, literal: "<", precedence: 2},
+      %Monkeylang.Token{type: :int, literal: "10", precedence: 0},
+      %Monkeylang.Token{type: :rparen, literal: ")", precedence: 0},
+      %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+      %Monkeylang.Token{type: :return, literal: "return", precedence: 0},
+      %Monkeylang.Token{type: true, literal: "true", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :rbrace, literal: "}", precedence: 0},
+      %Monkeylang.Token{type: :else, literal: "else", precedence: 0},
+      %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+      %Monkeylang.Token{type: :return, literal: "return", precedence: 0},
+      %Monkeylang.Token{type: false, literal: "false", precedence: 0},
+      %Monkeylang.Token{type: :semicolon, literal: ";", precedence: 0},
+      %Monkeylang.Token{type: :rbrace, literal: "}", precedence: 0},
+      %Monkeylang.Token{type: :eof, literal: "", precedence: 0}
     ]
 
     assert Lexer.tokenize(input) == expected
