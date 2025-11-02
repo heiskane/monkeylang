@@ -86,7 +86,10 @@ defmodule Monkeylang.Parser do
        do: {tokens, left, errors}
 
   defp parse_infix([_, next | tail], left, precedence, errors) do
-    # TODO: handle :lparen
+    if next.type == :lparen do
+      raise ":lparen not implemented"
+    end
+
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
     infix = %Monkeylang.AST.InfixExpression{

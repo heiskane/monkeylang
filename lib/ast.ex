@@ -23,7 +23,7 @@ defmodule Monkeylang.AST.Let do
 
   @type t :: %__MODULE__{
           token: Monkeylang.Token.t(),
-          name: term(),
+          name: String.t(),
           value: term()
         }
 end
@@ -70,7 +70,7 @@ defmodule Monkeylang.AST.PrefixExpression do
 
   @type t :: %__MODULE__{
           token: Monkeylang.Token.t(),
-          operator: term(),
+          operator: String.t(),
           right: term()
         }
 end
@@ -87,7 +87,7 @@ defmodule Monkeylang.AST.InfixExpression do
 
   @type t :: %__MODULE__{
           token: Monkeylang.Token.t(),
-          operator: term(),
+          operator: String.t(),
           left: term(),
           right: term()
         }
