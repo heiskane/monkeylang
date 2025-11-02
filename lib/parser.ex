@@ -63,6 +63,12 @@ defmodule Monkeylang.Parser do
     {tokens, node, errors}
   end
 
+  defp parse_token([token = %Token{type: :minus} | tail], :prefix, errors) do
+    {tokens, right, errors} = parse_expression(tail, 6, errors)
+    node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
+    {tokens, node, errors}
+  end
+
   defp parse_token(tokens = [token | _], type, errors) do
     IO.puts("cant parse token #{token.type} as #{type}")
     {tokens, nil, errors}
