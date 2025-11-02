@@ -63,7 +63,7 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_prefix([token = %Token{type: :minus} | tail], errors) do
-    {tokens, right, errors} = parse_expression(tail, 6, errors)
+    {tokens, right, errors} = parse_expression(tail, get_precedence(:minus), errors)
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
     {tokens, node, errors}
   end
