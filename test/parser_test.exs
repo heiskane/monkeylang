@@ -4,8 +4,35 @@ defmodule ParserTest do
 
   test "test basic parsing" do
     input = """
-      let a = 5;
-      let b = 10;
+      1 + 2 + 3
     """
+
+    {[node | _], _errors = []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> dbg()
+
+    expected = %Monkeylang.AST.InfixExpression{
+      token: %Monkeylang.Token{type: :plus, literal: "+"},
+      operator: "+",
+      left: %Monkeylang.AST.InfixExpression{
+        token: %Monkeylang.Token{type: :plus, literal: "+"},
+        operator: "+",
+        left: %Monkeylang.AST.Integer{
+          token: %Monkeylang.Token{type: :int, literal: "1"},
+          value: 1
+        },
+        right: %Monkeylang.AST.Integer{
+          token: %Monkeylang.Token{type: :int, literal: "2"},
+          value: 2
+        }
+      },
+      right: %Monkeylang.AST.Integer{
+        token: %Monkeylang.Token{type: :int, literal: "3"},
+        value: 3
+      }
+    }
+
+    assert node == expected
   end
 end
