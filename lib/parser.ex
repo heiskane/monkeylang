@@ -85,17 +85,18 @@ defmodule Monkeylang.Parser do
     end
   end
 
+  defp infix_loop(tokens = [_, next | _], left, _precedence, errors)
+       when next.type not in @infixable,
+       do: {tokens, left, errors}
+
   defp infix_loop(tokens = [_, next | tail], left, precedence, errors) do
     dbg({tokens, left, precedence})
 
-    case {precedence < get_precedence(next.type), next.type in @infixable} do
-      {false, _} ->
+    case precedence < get_precedence(next.type) do
+      false ->
         {tokens, left, errors}
 
-      {true, false} ->
-        {tokens, left, errors}
-
-      {true, true} ->
+      true ->
         # TODO: handle :lparen
         {tokens, right, errors} = parse_expression(tail, get_precedence(next.type), errors)
 
