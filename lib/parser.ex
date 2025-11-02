@@ -51,6 +51,7 @@ defmodule Monkeylang.Parser do
     do: parse_statements(tail, statements, errors)
 
   defp parse_statements(tokens, statements, errors) do
+    # Start with the lowest precedence
     {rest, expression, errors} =
       parse_expression(tokens, 0, errors)
 
@@ -74,17 +75,17 @@ defmodule Monkeylang.Parser do
 
   defp parse_expression(tokens, precedence, errors) do
     {tokens, left, errors} = parse_prefix(tokens, errors)
-    infix_loop(tokens, left, precedence, errors)
+    parse_infix(tokens, left, precedence, errors)
   end
 
-  defp infix_loop(tokens, nil, _precedence, errors),
+  defp parse_infix(tokens, nil, _precedence, errors),
     do: {tokens, nil, errors}
 
-  defp infix_loop(tokens = [_, next | _], left, precedence, errors)
+  defp parse_infix(tokens = [_, next | _], left, precedence, errors)
        when next.type not in @infixable or not (precedence < next.precedence),
        do: {tokens, left, errors}
 
-  defp infix_loop([_, next | tail], left, precedence, errors) do
+  defp parse_infix([_, next | tail], left, precedence, errors) do
     # TODO: handle :lparen
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
@@ -95,7 +96,7 @@ defmodule Monkeylang.Parser do
       right: right
     }
 
-    infix_loop(tokens, infix, precedence, errors)
+    parse_infix(tokens, infix, precedence, errors)
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
