@@ -22,8 +22,13 @@ input2 = """
   1 + 2 + 3
 """
 
-tokens = Monkeylang.Lexer.tokenize(input2)
-|> dbg(limit: :infinity)
+tokens =
+  Monkeylang.Lexer.tokenize(input2)
+  |> dbg(limit: :infinity)
 
-Monkeylang.Parser.parse_tokens(tokens)
-|> dbg()
+{statements, errors} =
+  Monkeylang.Parser.parse_tokens(tokens)
+  |> dbg()
+
+statements
+# |> Enum.each(&IO.puts/1)

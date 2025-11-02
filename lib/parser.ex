@@ -14,6 +14,20 @@ defmodule Monkeylang.Parser do
     :lparen => 6
   }
 
+  @infixable [
+    :plus,
+    :minus,
+    :slash,
+    :asterisk,
+    :eq,
+    :not_eq,
+    :lt,
+    :gt
+    # TODO: lparen
+  ]
+
+  defp get_precedence(type), do: Map.get(@precedences, type, 0)
+
   def parse_tokens(tokens), do: parse_statements(tokens, [], [])
 
   defp parse_statements([], statements, errors),
@@ -38,23 +52,14 @@ defmodule Monkeylang.Parser do
     do: parse_statements(tail, statements, errors)
 
   defp parse_statements(tokens, statements, errors) do
-    {rest, expression, errors} = parse_expression(tokens, 0, errors)
-    |> dbg()
-    parse_statements(rest, [expression | statements], errors)
+    {rest, expression, errors} =
+      parse_expression(tokens, 0, errors)
+      |> dbg()
+
+    parse_statements(tl(rest), [expression | statements], errors)
   end
 
-  defp parse_token([token = %Token{type: :plus} | tail], :prefix, errors) do
-    {tokens, right, errors} = parse_expression(tail, 0, errors)
-
-    node = %Monkeylang.AST.PrefixExpression{
-      token: token,
-      operator: token.literal,
-      right: right
-    }
-
-    {tokens, node, errors}
-  end
-
+  # TODO: this is really just `parse_prefix`
   defp parse_token(tokens = [token = %Token{type: :int} | _], :prefix, errors) do
     node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
     {tokens, node, errors}
@@ -68,26 +73,34 @@ defmodule Monkeylang.Parser do
   @spec parse_expression(list(Token.t()), integer(), list(String.t())) ::
           {list(Token.t()), Token.t(), list(String.t())}
   defp parse_expression(tokens, precedence, errors) do
-    # dbg({tokens, precedence})
-    {tokens = [next | tail], left, errors} = parse_token(tokens, :prefix, errors)
+    # dbg({hd(tokens), precedence})
+    {tokens = [curr, next | tail], left, errors} =
+      parse_token(tokens, :prefix, errors)
+      |> dbg()
 
-    dbg({precedence, @precedences[next.type]})
-    case precedence < @precedences[next.type] do
-      false ->
-        {tokens, left, errors}
+    if is_nil(left) do
+      {tokens, next, errors}
+    else
+      case {precedence < get_precedence(next.type), next.type in @infixable} do
+        {false, _} ->
+          {tokens, left, errors}
 
-      true ->
-        # TODO: handle :lparen
-        {tokens, right, errors} = parse_expression(tail, @precedences[next.type], errors)
+        {true, false} ->
+          {tokens, left, errors}
 
-        infix = %Monkeylang.AST.InfixExpression{
-          token: next,
-          operator: next.literal,
-          left: left,
-          right: right
-        }
+        {true, true} ->
+          # TODO: handle :lparen
+          {tokens, right, errors} = parse_expression(tail, get_precedence(next.type), errors)
 
-        {tokens, infix, errors}
+          infix = %Monkeylang.AST.InfixExpression{
+            token: next,
+            operator: next.literal,
+            left: left,
+            right: right
+          }
+
+          {tokens, infix, errors}
+      end
     end
   end
 
