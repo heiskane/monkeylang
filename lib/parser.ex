@@ -75,6 +75,15 @@ defmodule Monkeylang.Parser do
     {tokens, node, errors}
   end
 
+  defp parse_prefix([%Token{type: :lparen} | tail], errors) do
+    {tokens = [_, next | _], expression, errors} = parse_expression(tail, 0, errors)
+
+    case next.type do
+      :rparen -> {tl(tokens), expression, errors}
+      _ -> {tokens, nil, errors}
+    end
+  end
+
   defp parse_prefix(tokens = [token | _], errors) do
     {tokens, nil, ["cant parse prefix #{token.type}" | errors]}
   end

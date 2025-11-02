@@ -10,7 +10,7 @@ defmodule ParserTest do
     {[node | _], _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
-      |> dbg()
+      # |> dbg()
 
     expected = %Monkeylang.AST.InfixExpression{
       token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
@@ -45,7 +45,8 @@ defmodule ParserTest do
     {statements, _errors} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
-      |> dbg()
+
+    # |> dbg()
 
     expected = [
       %Monkeylang.AST.InfixExpression{
@@ -85,5 +86,41 @@ defmodule ParserTest do
     # IO.puts(hd(statements))
     # IO.puts(hd(tl(statements)))
     assert statements == expected
+  end
+
+  test "test grouped" do
+    input = """
+      (1 + 2) * 3;
+    """
+
+    {[node | _], _errors} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      # |> dbg()
+
+    expected = %Monkeylang.AST.InfixExpression{
+      token: %Monkeylang.Token{type: :asterisk, literal: "*", precedence: 4},
+      operator: "*",
+      left: %Monkeylang.AST.InfixExpression{
+        token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+        operator: "+",
+        left: %Monkeylang.AST.Integer{
+          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+          value: 1
+        },
+        right: %Monkeylang.AST.Integer{
+          token: %Monkeylang.Token{type: :int, literal: "2", precedence: 0},
+          value: 2
+        }
+      },
+      right: %Monkeylang.AST.Integer{
+        token: %Monkeylang.Token{type: :int, literal: "3", precedence: 0},
+        value: 3
+      }
+    }
+
+    # IO.puts(node)
+
+    assert node == expected
   end
 end
