@@ -80,17 +80,12 @@ defmodule Monkeylang.Parser do
   defp infix_loop(tokens, nil, _precedence, errors),
     do: {tokens, nil, errors}
 
-  defp infix_loop(tokens = [_, next | _], left, _precedence, errors)
-       when next.type not in @infixable,
-       do: {tokens, left, errors}
-
   defp infix_loop(tokens = [_, next | _], left, precedence, errors)
-       when not (precedence < next.precedence),
+       when next.type not in @infixable or not (precedence < next.precedence),
        do: {tokens, left, errors}
 
   defp infix_loop([_, next | tail], left, precedence, errors) do
     # TODO: handle :lparen
-
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
     infix = %Monkeylang.AST.InfixExpression{
