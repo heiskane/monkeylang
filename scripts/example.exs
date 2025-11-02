@@ -19,11 +19,10 @@ input = """
 """
 
 input2 = """
-  !5;
-  -15;
+  1 + 2 + 3
 """
 
-tokens = Monkeylang.Lexer.tokenize(input)
+tokens = Monkeylang.Lexer.tokenize(input2)
 |> dbg(limit: :infinity)
 
 Monkeylang.Parser.parse_tokens(tokens)

@@ -58,3 +58,15 @@ defmodule Monkeylang.AST.PrefixExpression do
           right: term()
         }
 end
+
+defmodule Monkeylang.AST.InfixExpression do
+  @enforce_keys [:token, :operator, :left, :right]
+  defstruct [:token, :operator, :left, :right]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          operator: term(),
+          left: term(),
+          right: term()
+        }
+end
