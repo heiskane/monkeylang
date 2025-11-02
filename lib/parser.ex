@@ -57,6 +57,7 @@ defmodule Monkeylang.Parser do
       |> dbg()
 
     parse_statements(tl(rest), [expression | statements], errors)
+    |> dbg()
   end
 
   # TODO: this is really just `parse_prefix`
@@ -79,7 +80,7 @@ defmodule Monkeylang.Parser do
       |> dbg()
 
     if is_nil(left) do
-      {tokens, next, errors}
+      {tokens, left, errors}
     else
       case {precedence < get_precedence(next.type), next.type in @infixable} do
         {false, _} ->

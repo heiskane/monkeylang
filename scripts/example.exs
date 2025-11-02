@@ -31,4 +31,4 @@ tokens =
   |> dbg()
 
 statements
-# |> Enum.each(&IO.puts/1)
+|> Enum.each(&IO.puts/1)
