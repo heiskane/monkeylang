@@ -114,3 +114,37 @@ defimpl String.Chars, for: Monkeylang.AST.InfixExpression do
     "(#{node.left} #{node.token.literal} #{node.right})"
   end
 end
+
+defmodule Monkeylang.AST.IfExpression do
+  @enforce_keys [:token, :condition, :consequence, :alternative]
+  defstruct [:token, :condition, :consequence, :alternative]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          condition: term(),
+          consequence: term(),
+          alternative: term() | nil
+        }
+end
+
+defimpl String.Chars, for: Monkeylang.AST.IfExpression do
+  def to_string(node = %Monkeylang.AST.IfExpression{}) do
+    "if #{node.condition} do #{node.consequence} else #{node.alternative}"
+  end
+end
+
+defmodule Monkeylang.AST.BlockStatement do
+  @enforce_keys [:token, :statements]
+  defstruct [:token, :statements]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          statements: list()
+        }
+end
+
+defimpl String.Chars, for: Monkeylang.AST.BlockStatement do
+  def to_string(node = %Monkeylang.AST.BlockStatement{}) do
+    Enum.reduce(node.statements, "", &(&1 <> &2.to_string()))
+  end
+end

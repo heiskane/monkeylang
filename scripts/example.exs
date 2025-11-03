@@ -25,8 +25,12 @@ input2 = """
   (1 + (2 + 3)) * 4;
 """
 
+input3 = """
+  if (x < y) { x };
+"""
+
 tokens =
-  Monkeylang.Lexer.tokenize(input2)
+  Monkeylang.Lexer.tokenize(input3)
   |> dbg(limit: :infinity)
 
 {statements, errors} =

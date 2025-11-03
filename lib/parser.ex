@@ -34,31 +34,57 @@ defmodule Monkeylang.Parser do
   defp parse_statements([%Token{type: :eof} | _], statements, errors),
     do: {Enum.reverse(statements), errors}
 
-  defp parse_statements(tokens = [%Token{type: :let} | _], statements, errors) do
-    {node, rest, errors} = handle_let(tokens, errors)
-    parse_statements(rest, [node | statements], errors)
-  end
-
-  defp parse_statements(tokens = [%Token{type: :return} | _], statements, errors) do
-    {node, rest, errors} = handle_return(tokens, errors)
-    parse_statements(rest, [node | statements], errors)
-  end
-
   # semicolons are optional lol
   defp parse_statements([%Token{type: :semicolon} | tail], statements, errors),
     do: parse_statements(tail, statements, errors)
 
   defp parse_statements(tokens, statements, errors) do
-    # Start with the lowest precedence
-    {rest, expression, errors} =
-      parse_expression(tokens, 0, errors)
+    {statement, rest, errors} = parse_statement(tokens, errors)
+    parse_statements(tl(rest), [statement | statements], errors)
+  end
 
-    parse_statements(tl(rest), [expression | statements], errors)
+  defp parse_statement(tokens = [%Token{type: :let} | _], errors) do
+    handle_let(tokens, errors)
+  end
+
+  defp parse_statement(tokens = [%Token{type: :return} | _], errors) do
+    handle_return(tokens, errors)
+  end
+
+  defp parse_statement(tokens, errors) do
+    {rest, expression, errors} = parse_expression(tokens, 0, errors)
+    {expression, rest, errors}
   end
 
   defp parse_prefix(tokens = [token = %Token{type: :int} | _], errors) do
     node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
     {tokens, node, errors}
+  end
+
+  defp parse_prefix([token = %Token{type: :if} | tail], errors) do
+    # node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
+    # TODO: add with statement?
+    # TODO: make sure :lparen is next
+    {tokens, condition, errors} = parse_expression(tail, 0, errors)
+
+    # TODO: make sure :rparen is next
+    # TODO: make sure :rbrace is next
+    # TODO: consume 2 items
+    # TODO: parse block statement
+    {tokens, block, errors} = parse_block(tokens, errors)
+
+    node = %Monkeylang.AST.IfExpression{
+      token: token,
+      condition: condition,
+      consequence: block,
+      alternative: nil
+    }
+
+    {tokens, node, errors}
+  end
+
+  defp parse_block([_, tail], errors) do
+    parse_statement(tail, errors)
   end
 
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
