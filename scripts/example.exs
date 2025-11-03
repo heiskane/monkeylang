@@ -26,7 +26,7 @@ input2 = """
 """
 
 input3 = """
-  if (x < y) { x };
+  if (x < y) { x } else { y };
 """
 
 tokens =
