@@ -65,15 +65,23 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_prefix([token = %Token{type: :if} | tail], errors) do
-    # node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
+    # TODO: add test
     # TODO: add with statement?
     # TODO: make sure :lparen is next
     {tokens, condition, errors} = parse_expression(tail, 0, errors)
 
     # TODO: make sure :rparen is next
-    # TODO: make sure :rbrace is next
+    # TODO: make sure :lbrace is next
     {tokens, block, errors} = parse_block(tl(tokens), errors)
-    {tokens, alternative, errors} = parse_else(tl(tokens), errors)
+
+    # TODO: make sure :rbrace is next
+    tokens = tl(tokens)
+
+    {tokens, alternative, errors} =
+      case hd(tokens).type do
+        :else -> parse_block(tl(tokens), errors)
+        _ -> {tl(tokens), nil, errors}
+      end
 
     node = %Monkeylang.AST.IfExpression{
       token: token,
@@ -110,12 +118,6 @@ defmodule Monkeylang.Parser do
   defp parse_prefix(tokens = [token | _], errors) do
     {tokens, nil, ["cant parse prefix #{token.type}" | errors]}
   end
-
-  defp parse_else([%Token{type: :else} | tail], errors) do
-    {tokens, block, errors} = parse_block(tail, errors)
-  end
-
-  defp parse_else(tokens, errors), do: {tokens, nil, errors}
 
   defp parse_block([head | tail], errors) do
     {tokens, statements, errors} = parse_block_statements(tail, errors, [])

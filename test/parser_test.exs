@@ -10,7 +10,8 @@ defmodule ParserTest do
     {[node | _], _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
-      # |> dbg()
+
+    # |> dbg()
 
     expected = %Monkeylang.AST.InfixExpression{
       token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
@@ -93,10 +94,11 @@ defmodule ParserTest do
       (1 + 2) * 3;
     """
 
-    {[node | _], _errors} =
+    {[node | _], []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
-      # |> dbg()
+
+    # |> dbg()
 
     expected = %Monkeylang.AST.InfixExpression{
       token: %Monkeylang.Token{type: :asterisk, literal: "*", precedence: 4},
@@ -120,6 +122,53 @@ defmodule ParserTest do
     }
 
     # IO.puts(node)
+
+    assert node == expected
+  end
+
+  test "test if else" do
+    input = """
+      if (x < y) { x } else { y };
+    """
+
+    {[node | _], []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    expected =
+      %Monkeylang.AST.IfExpression{
+        token: %Monkeylang.Token{type: :if, literal: "if", precedence: 0},
+        condition: %Monkeylang.AST.InfixExpression{
+          token: %Monkeylang.Token{type: :lt, literal: "<", precedence: 2},
+          operator: "<",
+          left: %Monkeylang.AST.Ident{
+            token: %Monkeylang.Token{type: :ident, literal: "x", precedence: 0},
+            value: "x"
+          },
+          right: %Monkeylang.AST.Ident{
+            token: %Monkeylang.Token{type: :ident, literal: "y", precedence: 0},
+            value: "y"
+          }
+        },
+        consequence: %Monkeylang.AST.BlockStatement{
+          token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+          statements: [
+            %Monkeylang.AST.Ident{
+              token: %Monkeylang.Token{type: :ident, literal: "x", precedence: 0},
+              value: "x"
+            }
+          ]
+        },
+        alternative: %Monkeylang.AST.BlockStatement{
+          token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+          statements: [
+            %Monkeylang.AST.Ident{
+              token: %Monkeylang.Token{type: :ident, literal: "y", precedence: 0},
+              value: "y"
+            }
+          ]
+        }
+      }
 
     assert node == expected
   end
