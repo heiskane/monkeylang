@@ -39,7 +39,7 @@ defmodule Monkeylang.Parser do
     do: parse_statements(tail, statements, errors)
 
   defp parse_statements(tokens, statements, errors) do
-    {statement, rest, errors} = parse_statement(tokens, errors)
+    {rest, statement, errors} = parse_statement(tokens, errors)
     parse_statements(tl(rest), [statement | statements], errors)
   end
 
@@ -51,10 +51,8 @@ defmodule Monkeylang.Parser do
     handle_return(tokens, errors)
   end
 
-  defp parse_statement(tokens, errors) do
-    {rest, expression, errors} = parse_expression(tokens, 0, errors)
-    {expression, rest, errors}
-  end
+  defp parse_statement(tokens, errors),
+    do: parse_expression(tokens, 0, errors)
 
   defp parse_prefix(tokens = [token = %Token{type: :int} | _], errors) do
     node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
@@ -147,7 +145,7 @@ defmodule Monkeylang.Parser do
       |> elem(1)
       |> tl()
 
-    {node, tail, errors}
+    {tail, node, errors}
   end
 
   defp handle_let(
@@ -171,7 +169,7 @@ defmodule Monkeylang.Parser do
       |> elem(1)
       |> tl()
 
-    {node, tail, errors}
+    {tail, node, errors}
   end
 
   defp handle_let([%Token{type: :let} | tail], errors) do
@@ -183,7 +181,7 @@ defmodule Monkeylang.Parser do
         (token = Enum.at(tail, 1)).type != :assign -> "expected assign but got #{token.type}"
       end
 
-    {nil, tail, [message | errors]}
+    {tail, nil, [message | errors]}
   end
 
   defp get_precedence(type), do: Map.get(@precedences, type, 0)
