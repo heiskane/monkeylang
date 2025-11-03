@@ -64,6 +64,12 @@ defmodule Monkeylang.AST.Ident do
         }
 end
 
+defimpl String.Chars, for: Monkeylang.AST.Ident do
+  def to_string(node = %Monkeylang.AST.Ident{}) do
+    node.value
+  end
+end
+
 defmodule Monkeylang.AST.Integer do
   @enforce_keys [:token, :value]
   defstruct [:token, :value]
@@ -129,7 +135,7 @@ end
 
 defimpl String.Chars, for: Monkeylang.AST.IfExpression do
   def to_string(node = %Monkeylang.AST.IfExpression{}) do
-    "if #{node.condition} do #{node.consequence} else #{node.alternative}"
+    "if #{node.condition} do {#{node.consequence}} else {#{node.alternative || "()"}}"
   end
 end
 
@@ -145,6 +151,6 @@ end
 
 defimpl String.Chars, for: Monkeylang.AST.BlockStatement do
   def to_string(node = %Monkeylang.AST.BlockStatement{}) do
-    Enum.reduce(node.statements, "", &(&1 <> &2.to_string()))
+    Enum.reduce(node.statements, "", &(&2 <> "#{&1}"))
   end
 end

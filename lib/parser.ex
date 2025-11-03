@@ -54,6 +54,11 @@ defmodule Monkeylang.Parser do
   defp parse_statement(tokens, errors),
     do: parse_expression(tokens, 0, errors)
 
+  defp parse_prefix(tokens = [token = %Token{type: :ident} | _], errors) do
+    node = %Monkeylang.AST.Ident{token: token, value: token.literal}
+    {tokens, node, errors}
+  end
+
   defp parse_prefix(tokens = [token = %Token{type: :int} | _], errors) do
     node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
     {tokens, node, errors}
@@ -67,7 +72,7 @@ defmodule Monkeylang.Parser do
 
     # TODO: make sure :rparen is next
     # TODO: make sure :rbrace is next
-    # TODO: consume 2 items
+    tokens = tl(tokens)
     # TODO: parse block statement
     {tokens, block, errors} = parse_block(tokens, errors)
 
@@ -79,10 +84,6 @@ defmodule Monkeylang.Parser do
     }
 
     {tokens, node, errors}
-  end
-
-  defp parse_block([_, tail], errors) do
-    parse_statement(tail, errors)
   end
 
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
@@ -109,6 +110,24 @@ defmodule Monkeylang.Parser do
 
   defp parse_prefix(tokens = [token | _], errors) do
     {tokens, nil, ["cant parse prefix #{token.type}" | errors]}
+  end
+
+  defp parse_block([head | tail], errors) do
+    {tokens, statements, errors} = parse_block_statements(tail, errors, [])
+    block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
+    {tokens, block, errors}
+  end
+
+  defp parse_block_statements(tokens = [head | _], errors, statements)
+       when head.type in [:rbrace, :eof] do
+    {tokens, Enum.reverse(statements), errors}
+  end
+
+  defp parse_block_statements(tokens, errors, statements) do
+    {tail, statement, errors} =
+      parse_statement(tokens, errors)
+
+    {tl(tail), [statement | statements], errors}
   end
 
   defp parse_expression(tokens, precedence, errors) do
