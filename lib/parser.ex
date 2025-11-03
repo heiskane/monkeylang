@@ -80,7 +80,7 @@ defmodule Monkeylang.Parser do
     {tokens, alternative, errors} =
       case hd(tokens).type do
         :else -> parse_block(tl(tokens), errors)
-        _ -> {tl(tokens), nil, errors}
+        _ -> {tokens, nil, errors}
       end
 
     node = %Monkeylang.AST.IfExpression{
