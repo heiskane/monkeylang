@@ -117,7 +117,6 @@ defmodule Monkeylang.Parser do
     do: parse_function_params(tail, errors, params)
 
   defp parse_function_params(tokens, errors, params) do
-    dbg(tokens)
     {tokens, node, errors} = parse_prefix(tokens, errors)
     parse_function_params(tokens, errors, [node | params])
   end
@@ -125,7 +124,6 @@ defmodule Monkeylang.Parser do
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
     {tokens, right, errors} =
       parse_expression(tail, get_precedence(token.type), errors)
-      |> dbg()
 
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
     {tokens, node, errors}
@@ -182,7 +180,6 @@ defmodule Monkeylang.Parser do
   defp parse_expression(tokens, precedence, errors) do
     {tokens, left, errors} =
       parse_prefix(tokens, errors)
-      |> dbg()
 
     parse_infix(tokens, left, precedence, errors)
   end
@@ -195,7 +192,6 @@ defmodule Monkeylang.Parser do
        do: {tokens, left, errors}
 
   defp parse_infix(tokens, left, precedence, errors) do
-    dbg(tokens)
     [next | tail] = tokens
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
@@ -264,13 +260,4 @@ defmodule Monkeylang.Parser do
   end
 
   defp get_precedence(type), do: Map.get(@precedences, type, 0)
-  defp peek_token([_, next | tail]), do: {next, tail}
-
-  # Not sure about this
-  # defp expect_type(%Token{type: type}, expected) do
-  #   case type != expected do
-  #     True -> "expected #{expected} got #{type}"
-  #     False -> nil
-  #   end
-  # end
 end

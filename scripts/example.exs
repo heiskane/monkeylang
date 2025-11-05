@@ -38,7 +38,7 @@ input4 = """
 """
 
 tokens =
-  Monkeylang.Lexer.tokenize(input3)
+  Monkeylang.Lexer.tokenize(input4)
   |> dbg(limit: :infinity)
 
 {statements, errors} =
