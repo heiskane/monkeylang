@@ -110,17 +110,6 @@ defmodule Monkeylang.Parser do
     {tokens, function, errors}
   end
 
-  defp parse_function_params([%Token{type: :rparen} | tail], errors, params),
-    do: {tail, Enum.reverse(params), errors}
-
-  defp parse_function_params([%Token{type: :comma} | tail], errors, params),
-    do: parse_function_params(tail, errors, params)
-
-  defp parse_function_params(tokens, errors, params) do
-    {tokens, node, errors} = parse_prefix(tokens, errors)
-    parse_function_params(tokens, errors, [node | params])
-  end
-
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
     {tokens, right, errors} =
       parse_expression(tail, get_precedence(token.type), errors)
@@ -155,28 +144,6 @@ defmodule Monkeylang.Parser do
     {tail, nil, ["cant parse prefix #{token.type}" | errors]}
   end
 
-  defp parse_block(tokens = [head | _], errors) do
-    with {:ok, tokens} <- assert_peek(tokens, :lbrace) do
-      {tokens, statements, errors} = parse_block_statements(tokens, errors, [])
-      block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
-      {tokens, block, errors}
-    else
-      {:error, msg} -> {tokens, nil, [msg | errors]}
-    end
-  end
-
-  defp parse_block_statements(tokens = [head | _], errors, statements)
-       when head.type in [:rbrace, :eof] do
-    {tokens, Enum.reverse(statements), errors}
-  end
-
-  defp parse_block_statements(tokens, errors, statements) do
-    {tail, statement, errors} =
-      parse_statement(tokens, errors)
-
-    {tl(tail), [statement | statements], errors}
-  end
-
   defp parse_expression(tokens, precedence, errors) do
     {tokens, left, errors} =
       parse_prefix(tokens, errors)
@@ -204,6 +171,39 @@ defmodule Monkeylang.Parser do
     }
 
     parse_infix(tokens, infix, precedence, errors)
+  end
+
+  defp parse_block(tokens = [head | _], errors) do
+    with {:ok, tokens} <- assert_peek(tokens, :lbrace) do
+      {tokens, statements, errors} = parse_block_statements(tokens, errors, [])
+      block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
+      {tokens, block, errors}
+    else
+      {:error, msg} -> {tokens, nil, [msg | errors]}
+    end
+  end
+
+  defp parse_block_statements(tokens = [head | _], errors, statements)
+       when head.type in [:rbrace, :eof] do
+    {tokens, Enum.reverse(statements), errors}
+  end
+
+  defp parse_block_statements(tokens, errors, statements) do
+    {tail, statement, errors} =
+      parse_statement(tokens, errors)
+
+    {tl(tail), [statement | statements], errors}
+  end
+
+  defp parse_function_params([%Token{type: :rparen} | tail], errors, params),
+    do: {tail, Enum.reverse(params), errors}
+
+  defp parse_function_params([%Token{type: :comma} | tail], errors, params),
+    do: parse_function_params(tail, errors, params)
+
+  defp parse_function_params(tokens, errors, params) do
+    {tokens, node, errors} = parse_prefix(tokens, errors)
+    parse_function_params(tokens, errors, [node | params])
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
