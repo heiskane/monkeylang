@@ -65,8 +65,6 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_prefix([token = %Token{type: :if} | tail], errors) do
-    # TODO: add test
-    # TODO: make sure :lparen is next?
     {tokens, condition, errors} =
       parse_expression(tail, 0, errors)
 
