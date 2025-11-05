@@ -66,31 +66,34 @@ defmodule Monkeylang.Parser do
 
   defp parse_prefix([token = %Token{type: :if} | tail], errors) do
     # TODO: add test
-    # TODO: add with statement?
-    # TODO: make sure :lparen is next
-    {tokens, condition, errors} = parse_expression(tail, 0, errors)
+    # TODO: make sure :lparen is next?
+    {tokens, condition, errors} =
+      parse_expression(tail, 0, errors)
 
-    # TODO: make sure :rparen is next
-    # TODO: make sure :lbrace is next
-    {tokens, block, errors} = parse_block(tl(tokens), errors)
+    with {:ok, tokens} <- assert_peek(tokens, :rparen) do
+      {tokens, block, errors} = parse_block(tokens, errors)
 
-    # TODO: make sure :rbrace is next
-    tokens = tl(tokens)
+      with {:ok, tokens} <- assert_peek(tokens, :rbrace) do
+        {tokens, alternative, errors} =
+          case hd(tokens).type do
+            :else -> parse_block(tl(tokens), errors)
+            _ -> {tokens, nil, errors}
+          end
 
-    {tokens, alternative, errors} =
-      case hd(tokens).type do
-        :else -> parse_block(tl(tokens), errors)
-        _ -> {tokens, nil, errors}
+        node = %Monkeylang.AST.IfExpression{
+          token: token,
+          condition: condition,
+          consequence: block,
+          alternative: alternative
+        }
+
+        {tokens, node, errors}
+      else
+        {:error, message} -> {tokens, nil, [message | errors]}
       end
-
-    node = %Monkeylang.AST.IfExpression{
-      token: token,
-      condition: condition,
-      consequence: block,
-      alternative: alternative
-    }
-
-    {tokens, node, errors}
+    else
+      {:error, message} -> {tokens, nil, [message | errors]}
+    end
   end
 
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
@@ -119,10 +122,14 @@ defmodule Monkeylang.Parser do
     {tokens, nil, ["cant parse prefix #{token.type}" | errors]}
   end
 
-  defp parse_block([head | tail], errors) do
-    {tokens, statements, errors} = parse_block_statements(tail, errors, [])
-    block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
-    {tokens, block, errors}
+  defp parse_block(tokens = [head | _], errors) do
+    with {:ok, tokens} <- assert_peek(tokens, :lbrace) do
+      {tokens, statements, errors} = parse_block_statements(tokens, errors, [])
+      block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
+      {tokens, block, errors}
+    else
+      {:error, msg} -> {tokens, nil, [msg | errors]}
+    end
   end
 
   defp parse_block_statements(tokens = [head | _], errors, statements)
@@ -208,6 +215,13 @@ defmodule Monkeylang.Parser do
       end
 
     {tail, nil, [message | errors]}
+  end
+
+  defp assert_peek([%Token{type: type} | tail], expected) do
+    case type == expected do
+      true -> {:ok, tail}
+      false -> {:error, "expected #{expected} but got #{type}"}
+    end
   end
 
   defp get_precedence(type), do: Map.get(@precedences, type, 0)
