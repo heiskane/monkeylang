@@ -38,6 +38,12 @@ defmodule Monkeylang.AST.Return do
         }
 end
 
+defimpl String.Chars, for: Monkeylang.AST.Return do
+  def to_string(node = %Monkeylang.AST.Return{}) do
+    "return #{node.value}"
+  end
+end
+
 defmodule Monkeylang.AST.Boolean do
   @enforce_keys [:token, :value]
   defstruct [:token, :value]
@@ -164,4 +170,11 @@ defmodule Monkeylang.AST.FunctionLiteral do
           parameters: Monkeylang.AST.Ident.t(),
           body: Monkeylang.AST.BlockStatement.t()
         }
+end
+
+defimpl String.Chars, for: Monkeylang.AST.FunctionLiteral do
+  def to_string(node = %Monkeylang.AST.FunctionLiteral{}) do
+    params = Enum.join(node.parameters, ", ")
+    "fn(#{params}) { #{node.body} }"
+  end
 end

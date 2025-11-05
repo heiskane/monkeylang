@@ -111,7 +111,7 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_function_params([%Token{type: :rparen} | tail], errors, params),
-    do: {tail, params, errors}
+    do: {tail, Enum.reverse(params), errors}
 
   defp parse_function_params([%Token{type: :comma} | tail], errors, params),
     do: parse_function_params(tail, errors, params)
@@ -180,6 +180,7 @@ defmodule Monkeylang.Parser do
   defp parse_expression(tokens, precedence, errors) do
     {tokens, left, errors} =
       parse_prefix(tokens, errors)
+      |> dbg()
 
     parse_infix(tokens, left, precedence, errors)
   end
@@ -206,14 +207,9 @@ defmodule Monkeylang.Parser do
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
-    node = %Monkeylang.AST.Return{token: token, value: "todo"}
-
-    tail =
-      Enum.split_while(tail, &(&1.type != :semicolon))
-      |> elem(1)
-      |> tl()
-
-    {tail, node, errors}
+    {tokens, expression, errors} = parse_expression(tail, hd(tail).precedence, errors)
+    node = %Monkeylang.AST.Return{token: token, value: expression}
+    {tokens, node, errors}
   end
 
   defp handle_let(
