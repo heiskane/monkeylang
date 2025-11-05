@@ -1,4 +1,8 @@
-input = """
+input0 = """
+  1 + 1
+"""
+
+input1 = """
   return 1 + 2;
 
   let five = 5;
@@ -27,6 +31,10 @@ input2 = """
 
 input3 = """
   if (x < y) { x } else { y };
+"""
+
+input4 = """
+  fn(a, b) { return a > b };
 """
 
 tokens =

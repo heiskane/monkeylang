@@ -40,7 +40,14 @@ defmodule Monkeylang.Parser do
 
   defp parse_statements(tokens, statements, errors) do
     {rest, statement, errors} = parse_statement(tokens, errors)
-    parse_statements(tl(rest), [statement | statements], errors)
+
+    rest =
+      case rest do
+        [] -> []
+        [_ | tail] -> tail
+      end
+
+    parse_statements(rest, [statement | statements], errors)
   end
 
   defp parse_statement(tokens = [%Token{type: :let} | _], errors) do
@@ -54,70 +61,104 @@ defmodule Monkeylang.Parser do
   defp parse_statement(tokens, errors),
     do: parse_expression(tokens, 0, errors)
 
-  defp parse_prefix(tokens = [token = %Token{type: :ident} | _], errors) do
+  # TODO: might not be necessary?
+  defp parse_prefix([%Token{type: :semicolon} | tail], errors),
+    do: parse_prefix(tail, errors)
+
+  defp parse_prefix([token = %Token{type: :ident} | tail], errors) do
     node = %Monkeylang.AST.Ident{token: token, value: token.literal}
-    {tokens, node, errors}
+    {tail, node, errors}
   end
 
-  defp parse_prefix(tokens = [token = %Token{type: :int} | _], errors) do
+  defp parse_prefix([token = %Token{type: :int} | tail], errors) do
     node = %Monkeylang.AST.Integer{token: token, value: String.to_integer(token.literal)}
-    {tokens, node, errors}
+    {tail, node, errors}
   end
 
   defp parse_prefix([token = %Token{type: :if} | tail], errors) do
     {tokens, condition, errors} =
       parse_expression(tail, 0, errors)
 
-    with {:ok, tokens} <- assert_peek(tokens, :rparen) do
-      {tokens, block, errors} = parse_block(tokens, errors)
+    {tokens, block, errors} = parse_block(tokens, errors)
 
-      with {:ok, tokens} <- assert_peek(tokens, :rbrace) do
-        {tokens, alternative, errors} =
-          case hd(tokens).type do
-            :else -> parse_block(tl(tokens), errors)
-            _ -> {tokens, nil, errors}
-          end
-
-        node = %Monkeylang.AST.IfExpression{
-          token: token,
-          condition: condition,
-          consequence: block,
-          alternative: alternative
-        }
-
-        {tokens, node, errors}
-      else
-        {:error, message} -> {tokens, nil, [message | errors]}
+    {tokens, alternative, errors} =
+      case hd(tokens).type do
+        :else -> parse_block(tl(tokens), errors)
+        _ -> {tokens, nil, errors}
       end
-    else
-      {:error, message} -> {tokens, nil, [message | errors]}
-    end
+
+    node = %Monkeylang.AST.IfExpression{
+      token: token,
+      condition: condition,
+      consequence: block,
+      alternative: alternative
+    }
+
+    {tokens, node, errors}
+  end
+
+  defp parse_prefix(tokens = [%Token{type: :function}, next | _], errors)
+       when next.type != :lparen,
+       do: {tokens, nil, ["expected :lparen got #{next.type}" | errors]}
+
+  defp parse_prefix([token = %Token{type: :function}, _lparen | tail], errors) do
+    {tokens, params, errors} = parse_function_params(tail, errors, [])
+    {tokens, block, errors} = parse_block(tokens, errors)
+
+    function = %Monkeylang.AST.FunctionLiteral{
+      token: token,
+      parameters: params,
+      body: block
+    }
+
+    {tokens, function, errors}
+  end
+
+  defp parse_function_params([%Token{type: :rparen} | tail], errors, params),
+    do: {tail, params, errors}
+
+  defp parse_function_params([%Token{type: :comma} | tail], errors, params),
+    do: parse_function_params(tail, errors, params)
+
+  defp parse_function_params(tokens, errors, params) do
+    dbg(tokens)
+    {tokens, node, errors} = parse_prefix(tokens, errors)
+    parse_function_params(tokens, errors, [node | params])
   end
 
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
-    {tokens, right, errors} = parse_expression(tail, get_precedence(token.type), errors)
+    {tokens, right, errors} =
+      parse_expression(tail, get_precedence(token.type), errors)
+      |> dbg()
+
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
     {tokens, node, errors}
   end
 
-  defp parse_prefix(tokens = [token | _], errors)
+  defp parse_prefix([token | tail], errors)
        when token.type in [true, false] do
     node = %Monkeylang.AST.Boolean{token: token, value: token.type}
-    {tokens, node, errors}
+    {tail, node, errors}
   end
 
   defp parse_prefix([%Token{type: :lparen} | tail], errors) do
-    {tokens, expression, errors} = parse_expression(tail, 0, errors)
-    {next, _} = peek_token(tokens)
+    {tokens, expression, errors} =
+      parse_expression(tail, 0, errors)
 
-    case next.type do
+    with {:ok, tokens} <- assert_peek(tokens, :rparen) do
+      {tokens, expression, errors}
+    else
+      {:error, error} -> {tokens, expression, [error | errors]}
+    end
+
+    case hd(tokens).type do
       :rparen -> {tl(tokens), expression, errors}
       _ -> {tokens, nil, errors}
     end
   end
 
-  defp parse_prefix(tokens = [token | _], errors) do
-    {tokens, nil, ["cant parse prefix #{token.type}" | errors]}
+  defp parse_prefix([token | tail], errors) do
+    {tail, nil, ["cant parse prefix #{token.type}" | errors]}
   end
 
   defp parse_block(tokens = [head | _], errors) do
@@ -143,19 +184,26 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_expression(tokens, precedence, errors) do
-    {tokens, left, errors} = parse_prefix(tokens, errors)
+    {tokens, left, errors} =
+      parse_prefix(tokens, errors)
+      |> dbg()
+
     parse_infix(tokens, left, precedence, errors)
   end
 
-  defp parse_infix(tokens, nil, _precedence, errors),
-    do: {tokens, nil, errors}
+  defp parse_infix([], _left, _precedence, errors),
+    do: {[], nil, ["no infix to parse" | errors]}
 
-  defp parse_infix(tokens = [_, next | _], left, precedence, errors)
+  defp parse_infix(tokens, nil, _precedence, errors),
+    do: {tokens, nil, ["no left side for infix" | errors]}
+
+  defp parse_infix(tokens = [next | _], left, precedence, errors)
        when next.type not in @infixable or not (precedence < next.precedence),
        do: {tokens, left, errors}
 
   defp parse_infix(tokens, left, precedence, errors) do
-    {next, tail} = peek_token(tokens)
+    dbg(tokens)
+    [next | tail] = tokens
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
     infix = %Monkeylang.AST.InfixExpression{

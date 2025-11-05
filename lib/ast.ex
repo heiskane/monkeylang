@@ -154,3 +154,14 @@ defimpl String.Chars, for: Monkeylang.AST.BlockStatement do
     Enum.reduce(node.statements, "", &(&2 <> "#{&1}"))
   end
 end
+
+defmodule Monkeylang.AST.FunctionLiteral do
+  @enforce_keys [:token, :parameters, :body]
+  defstruct [:token, :parameters, :body]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          parameters: Monkeylang.AST.Ident.t(),
+          body: Monkeylang.AST.BlockStatement.t()
+        }
+end
