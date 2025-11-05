@@ -61,10 +61,6 @@ defmodule Monkeylang.Parser do
   defp parse_statement(tokens, errors),
     do: parse_expression(tokens, 0, errors)
 
-  # TODO: might not be necessary?
-  defp parse_prefix([%Token{type: :semicolon} | tail], errors),
-    do: parse_prefix(tail, errors)
-
   defp parse_prefix([token = %Token{type: :ident} | tail], errors) do
     node = %Monkeylang.AST.Ident{token: token, value: token.literal}
     {tail, node, errors}
@@ -190,9 +186,6 @@ defmodule Monkeylang.Parser do
 
     parse_infix(tokens, left, precedence, errors)
   end
-
-  defp parse_infix([], _left, _precedence, errors),
-    do: {[], nil, ["no infix to parse" | errors]}
 
   defp parse_infix(tokens, nil, _precedence, errors),
     do: {tokens, nil, ["no left side for infix" | errors]}
