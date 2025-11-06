@@ -358,4 +358,25 @@ defmodule ParserTest do
 
     assert node == expected
   end
+
+  test "test let" do
+    input = """
+      let asdf = 1;
+    """
+
+    {[node | _], []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    expected = %Monkeylang.AST.Let{
+      name: %Monkeylang.Token{type: :ident, literal: "asdf", precedence: 0},
+      value: %Monkeylang.AST.Integer{
+        value: 1,
+        token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0}
+      },
+      token: %Monkeylang.Token{type: :let, literal: "let", precedence: 0}
+    }
+
+    assert node == expected
+  end
 end

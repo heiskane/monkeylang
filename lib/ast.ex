@@ -28,6 +28,12 @@ defmodule Monkeylang.AST.Let do
         }
 end
 
+defimpl String.Chars, for: Monkeylang.AST.Let do
+  def to_string(node = %Monkeylang.AST.Let{}) do
+    "let #{node.name.literal} = #{node.value}"
+  end
+end
+
 defmodule Monkeylang.AST.Return do
   @enforce_keys [:token, :value]
   defstruct [:token, :value]

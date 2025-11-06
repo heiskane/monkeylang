@@ -223,7 +223,7 @@ defmodule Monkeylang.Parser do
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
-    {tokens, expression, errors} = parse_expression(tail, hd(tail).precedence, errors)
+    {tokens, expression, errors} = parse_expression(tail, token.precedence, errors)
     node = %Monkeylang.AST.Return{token: token, value: expression}
     {tokens, node, errors}
   end
@@ -236,20 +236,15 @@ defmodule Monkeylang.Parser do
          ],
          errors
        ) do
+    {tokens, expression, errors} = parse_expression(tail, token.precedence, errors)
+
     node = %Monkeylang.AST.Let{
       token: token,
       name: ident,
-      value: "todo"
+      value: expression
     }
 
-    # TODO: get value
-
-    tail =
-      Enum.split_while(tail, &(&1.type != :semicolon))
-      |> elem(1)
-      |> tl()
-
-    {tail, node, errors}
+    {tokens, node, errors}
   end
 
   defp handle_let([%Token{type: :let} | tail], errors) do
