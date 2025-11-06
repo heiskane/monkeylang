@@ -164,17 +164,6 @@ defmodule Monkeylang.Parser do
     {tokens, node, errors}
   end
 
-  defp parse_call_params([%Token{type: :rparen} | tail], errors, params),
-    do: {tail, Enum.reverse(params), errors}
-
-  defp parse_call_params([%Token{type: :comma} | tail], errors, params),
-    do: parse_call_params(tail, errors, params)
-
-  defp parse_call_params(tokens, errors, params) do
-    {tokens, expression, errors} = parse_expression(tokens, 0, errors)
-    parse_call_params(tokens, errors, [expression | params])
-  end
-
   defp parse_infix(tokens, left, precedence, errors) do
     [next | tail] = tokens
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
@@ -220,6 +209,17 @@ defmodule Monkeylang.Parser do
   defp parse_function_params(tokens, errors, params) do
     {tokens, node, errors} = parse_prefix(tokens, errors)
     parse_function_params(tokens, errors, [node | params])
+  end
+
+  defp parse_call_params([%Token{type: :rparen} | tail], errors, params),
+    do: {tail, Enum.reverse(params), errors}
+
+  defp parse_call_params([%Token{type: :comma} | tail], errors, params),
+    do: parse_call_params(tail, errors, params)
+
+  defp parse_call_params(tokens, errors, params) do
+    {tokens, expression, errors} = parse_expression(tokens, 0, errors)
+    parse_call_params(tokens, errors, [expression | params])
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
