@@ -178,3 +178,21 @@ defimpl String.Chars, for: Monkeylang.AST.FunctionLiteral do
     "fn(#{params}) { #{node.body} }"
   end
 end
+
+defmodule Monkeylang.AST.CallExpression do
+  @enforce_keys [:token, :function, :arguments]
+  defstruct [:token, :function, :arguments]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          function: term(),
+          arguments: list()
+        }
+end
+
+defimpl String.Chars, for: Monkeylang.AST.CallExpression do
+  def to_string(node = %Monkeylang.AST.CallExpression{}) do
+    args = Enum.join(node.arguments, ", ")
+    "#{node.function}(#{args})"
+  end
+end

@@ -22,8 +22,8 @@ defmodule Monkeylang.Parser do
     :equals,
     :notequals,
     :lt,
-    :gt
-    # TODO: lparen
+    :gt,
+    :lparen
   ]
 
   def parse_tokens(tokens), do: parse_statements(tokens, [], [])
@@ -157,6 +157,23 @@ defmodule Monkeylang.Parser do
   defp parse_infix(tokens = [next | _], left, precedence, errors)
        when next.type not in @infixable or not (precedence < next.precedence),
        do: {tokens, left, errors}
+
+  defp parse_infix([token = %Token{type: :lparen} | tail], function, _precedence, errors) do
+    {tokens, arguments, errors} = parse_call_params(tail, errors, [])
+    node = %Monkeylang.AST.CallExpression{token: token, function: function, arguments: arguments}
+    {tokens, node, errors}
+  end
+
+  defp parse_call_params([%Token{type: :rparen} | tail], errors, params),
+    do: {tail, Enum.reverse(params), errors}
+
+  defp parse_call_params([%Token{type: :comma} | tail], errors, params),
+    do: parse_call_params(tail, errors, params)
+
+  defp parse_call_params(tokens, errors, params) do
+    {tokens, expression, errors} = parse_expression(tokens, 0, errors)
+    parse_call_params(tokens, errors, [expression | params])
+  end
 
   defp parse_infix(tokens, left, precedence, errors) do
     [next | tail] = tokens
