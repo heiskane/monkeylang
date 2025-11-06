@@ -172,4 +172,62 @@ defmodule ParserTest do
 
     assert node == expected
   end
+
+  test "test function" do
+    input = """
+      fn(a, b) { return a > b };
+    """
+
+    {[node | _], []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    expected = %Monkeylang.AST.FunctionLiteral{
+      token: %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
+      parameters: [
+        %Monkeylang.AST.Ident{
+          token: %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+          value: "a"
+        },
+        %Monkeylang.AST.Ident{
+          token: %Monkeylang.Token{type: :ident, literal: "b", precedence: 0},
+          value: "b"
+        }
+      ],
+      body: %Monkeylang.AST.BlockStatement{
+        token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+        statements: [
+          %Monkeylang.AST.Return{
+            token: %Monkeylang.Token{
+              type: :return,
+              literal: "return",
+              precedence: 0
+            },
+            value: %Monkeylang.AST.InfixExpression{
+              token: %Monkeylang.Token{type: :gt, literal: ">", precedence: 2},
+              operator: ">",
+              left: %Monkeylang.AST.Ident{
+                token: %Monkeylang.Token{
+                  type: :ident,
+                  literal: "a",
+                  precedence: 0
+                },
+                value: "a"
+              },
+              right: %Monkeylang.AST.Ident{
+                token: %Monkeylang.Token{
+                  type: :ident,
+                  literal: "b",
+                  precedence: 0
+                },
+                value: "b"
+              }
+            }
+          }
+        ]
+      }
+    }
+
+    assert node == expected
+  end
 end
