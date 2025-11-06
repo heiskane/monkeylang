@@ -1,8 +1,12 @@
 defmodule Monkeylang.Repl do
   def start do
-    IO.gets("monke>")
-    |> Monkeylang.Lexer.tokenize()
-    |> IO.inspect()
+    {statements, errors} =
+      IO.gets("monke> ")
+      |> Monkeylang.Lexer.tokenize()
+      |> Monkeylang.Parser.parse_tokens()
+
+    Enum.each(errors, &IO.puts/1)
+    Enum.each(statements, &IO.puts/1)
     start()
   end
 end
