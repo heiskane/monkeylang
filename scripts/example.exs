@@ -34,7 +34,7 @@ input3 = """
 """
 
 input4 = """
-  fn(a, b) { return a > b };
+  fn() { return 1 + 1};
 """
 
 tokens =

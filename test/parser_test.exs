@@ -230,4 +230,45 @@ defmodule ParserTest do
 
     assert node == expected
   end
+
+  test "test function without params" do
+    input = """
+      fn() { return 1 + 1};
+    """
+
+    {[node | _], []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    expected = %Monkeylang.AST.FunctionLiteral{
+      token: %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
+      parameters: [],
+      body: %Monkeylang.AST.BlockStatement{
+        token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+        statements: [
+          %Monkeylang.AST.Return{
+            token: %Monkeylang.Token{
+              type: :return,
+              literal: "return",
+              precedence: 0
+            },
+            value: %Monkeylang.AST.InfixExpression{
+              token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+              operator: "+",
+              left: %Monkeylang.AST.Integer{
+                token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+                value: 1
+              },
+              right: %Monkeylang.AST.Integer{
+                token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+                value: 1
+              }
+            }
+          }
+        ]
+      }
+    }
+
+    assert node == expected
+  end
 end

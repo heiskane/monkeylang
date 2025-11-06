@@ -147,7 +147,6 @@ defmodule Monkeylang.Parser do
   defp parse_expression(tokens, precedence, errors) do
     {tokens, left, errors} =
       parse_prefix(tokens, errors)
-      |> dbg()
 
     parse_infix(tokens, left, precedence, errors)
   end
