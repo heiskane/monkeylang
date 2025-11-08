@@ -66,7 +66,7 @@ defmodule Monkeylang.Evaluator do
   defp eval_infix(:equals, left = %Object{}, right = %Object{}) when left.type != right.type,
     do: %Object{type: :boolean, value: false}
 
-  defp eval_infix(:equals, left = %Object{}, right = %Object{}),
+  defp eval_infix(:equals, left = %Object{}, right = %Object{}) when left.type == right.type,
     do: %Object{type: left.type, value: left.value == right.value}
 
   defp eval_infix(:notequals, left = %Object{}, right = %Object{}),
