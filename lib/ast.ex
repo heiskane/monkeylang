@@ -26,11 +26,11 @@ defmodule Monkeylang.AST.Let do
           name: String.t(),
           value: term()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.Let do
-  def to_string(node = %Monkeylang.AST.Let{}) do
-    "let #{node.name.literal} = #{node.value}"
+  defimpl String.Chars, for: Monkeylang.AST.Let do
+    def to_string(node = %Monkeylang.AST.Let{}) do
+      "let #{node.name.literal} = #{node.value}"
+    end
   end
 end
 
@@ -42,11 +42,11 @@ defmodule Monkeylang.AST.Return do
           token: Monkeylang.Token.t(),
           value: term()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.Return do
-  def to_string(node = %Monkeylang.AST.Return{}) do
-    "return #{node.value}"
+  defimpl String.Chars, for: Monkeylang.AST.Return do
+    def to_string(node = %Monkeylang.AST.Return{}) do
+      "return #{node.value}"
+    end
   end
 end
 
@@ -58,11 +58,11 @@ defmodule Monkeylang.AST.Boolean do
           token: Monkeylang.Token.t(),
           value: boolean()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.Boolean do
-  def to_string(node = %Monkeylang.AST.Boolean{}) do
-    node.token.literal
+  defimpl String.Chars, for: Monkeylang.AST.Boolean do
+    def to_string(node = %Monkeylang.AST.Boolean{}) do
+      node.token.literal
+    end
   end
 end
 
@@ -74,11 +74,11 @@ defmodule Monkeylang.AST.Ident do
           token: Monkeylang.Token.t(),
           value: String.t()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.Ident do
-  def to_string(node = %Monkeylang.AST.Ident{}) do
-    node.value
+  defimpl String.Chars, for: Monkeylang.AST.Ident do
+    def to_string(node = %Monkeylang.AST.Ident{}) do
+      node.value
+    end
   end
 end
 
@@ -90,11 +90,11 @@ defmodule Monkeylang.AST.Integer do
           token: Monkeylang.Token.t(),
           value: Integer.t()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.Integer do
-  def to_string(node = %Monkeylang.AST.Integer{}) do
-    node.token.literal
+  defimpl String.Chars, for: Monkeylang.AST.Integer do
+    def to_string(node = %Monkeylang.AST.Integer{}) do
+      node.token.literal
+    end
   end
 end
 
@@ -107,11 +107,11 @@ defmodule Monkeylang.AST.PrefixExpression do
           operator: String.t(),
           right: term()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.PrefixExpression do
-  def to_string(node = %Monkeylang.AST.PrefixExpression{}) do
-    "(#{node.token.literal}#{node.right})"
+  defimpl String.Chars, for: Monkeylang.AST.PrefixExpression do
+    def to_string(node = %Monkeylang.AST.PrefixExpression{}) do
+      "(#{node.token.literal}#{node.right})"
+    end
   end
 end
 
@@ -125,11 +125,11 @@ defmodule Monkeylang.AST.InfixExpression do
           left: term(),
           right: term()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.InfixExpression do
-  def to_string(node = %Monkeylang.AST.InfixExpression{}) do
-    "(#{node.left} #{node.token.literal} #{node.right})"
+  defimpl String.Chars, for: Monkeylang.AST.InfixExpression do
+    def to_string(node = %Monkeylang.AST.InfixExpression{}) do
+      "(#{node.left} #{node.token.literal} #{node.right})"
+    end
   end
 end
 
@@ -143,11 +143,11 @@ defmodule Monkeylang.AST.IfExpression do
           consequence: term(),
           alternative: term() | nil
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.IfExpression do
-  def to_string(node = %Monkeylang.AST.IfExpression{}) do
-    "if #{node.condition} do {#{node.consequence}} else {#{node.alternative || "()"}}"
+  defimpl String.Chars, for: Monkeylang.AST.IfExpression do
+    def to_string(node = %Monkeylang.AST.IfExpression{}) do
+      "if #{node.condition} do {#{node.consequence}} else {#{node.alternative || "()"}}"
+    end
   end
 end
 
@@ -159,11 +159,11 @@ defmodule Monkeylang.AST.BlockStatement do
           token: Monkeylang.Token.t(),
           statements: list()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.BlockStatement do
-  def to_string(node = %Monkeylang.AST.BlockStatement{}) do
-    Enum.reduce(node.statements, "", &(&2 <> "#{&1}"))
+  defimpl String.Chars, for: Monkeylang.AST.BlockStatement do
+    def to_string(node = %Monkeylang.AST.BlockStatement{}) do
+      Enum.reduce(node.statements, "", &(&2 <> "#{&1}"))
+    end
   end
 end
 
@@ -176,12 +176,12 @@ defmodule Monkeylang.AST.FunctionLiteral do
           parameters: Monkeylang.AST.Ident.t(),
           body: Monkeylang.AST.BlockStatement.t()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.FunctionLiteral do
-  def to_string(node = %Monkeylang.AST.FunctionLiteral{}) do
-    params = Enum.join(node.parameters, ", ")
-    "fn(#{params}) { #{node.body} }"
+  defimpl String.Chars, for: Monkeylang.AST.FunctionLiteral do
+    def to_string(node = %Monkeylang.AST.FunctionLiteral{}) do
+      params = Enum.join(node.parameters, ", ")
+      "fn(#{params}) { #{node.body} }"
+    end
   end
 end
 
@@ -194,11 +194,11 @@ defmodule Monkeylang.AST.CallExpression do
           function: term(),
           arguments: list()
         }
-end
 
-defimpl String.Chars, for: Monkeylang.AST.CallExpression do
-  def to_string(node = %Monkeylang.AST.CallExpression{}) do
-    args = Enum.join(node.arguments, ", ")
-    "#{node.function}(#{args})"
+  defimpl String.Chars, for: Monkeylang.AST.CallExpression do
+    def to_string(node = %Monkeylang.AST.CallExpression{}) do
+      args = Enum.join(node.arguments, ", ")
+      "#{node.function}(#{args})"
+    end
   end
 end

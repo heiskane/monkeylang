@@ -55,3 +55,4 @@ tokens =
 
 statements
 |> Enum.each(&IO.puts/1)
+# |> Enum.each(&Monkeylang.Evaluator.evaluate/1)
