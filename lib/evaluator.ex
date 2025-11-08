@@ -63,10 +63,13 @@ defmodule Monkeylang.Evaluator do
   defp eval_infix(:gt, left = %Object{type: :integer}, right = %Object{type: :integer}),
     do: %Object{type: :integer, value: left.value > right.value}
 
-  defp eval_infix(:equals, left = %Object{type: :integer}, right = %Object{type: :integer}),
-    do: %Object{type: :integer, value: left.value == right.value}
+  defp eval_infix(:equals, left = %Object{}, right = %Object{}) when left.type != right.type,
+    do: %Object{type: :boolean, value: false}
 
-  defp eval_infix(:notequals, left = %Object{type: :integer}, right = %Object{type: :integer}),
+  defp eval_infix(:equals, left = %Object{}, right = %Object{}),
+    do: %Object{type: left.type, value: left.value == right.value}
+
+  defp eval_infix(:notequals, left = %Object{}, right = %Object{}),
     do: %Object{type: :integer, value: left.value != right.value}
 
   defp eval_prefix(:bang, %Object{type: :boolean, value: value}),
