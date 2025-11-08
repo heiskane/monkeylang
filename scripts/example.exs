@@ -45,8 +45,12 @@ input6 = """
   let potato = fn() { return 1 + 1};
 """
 
+input7 = """
+  5
+"""
+
 tokens =
-  Monkeylang.Lexer.tokenize(input6)
+  Monkeylang.Lexer.tokenize(input7)
   |> dbg(limit: :infinity)
 
 {program, errors} =
@@ -54,3 +58,5 @@ tokens =
   |> dbg()
 
 IO.puts(program)
+
+Monkeylang.Evaluator.evaluate(program)
