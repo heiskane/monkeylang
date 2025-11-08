@@ -24,6 +24,12 @@ defmodule Monkeylang.Evaluator do
     eval_prefix(node.token.type, right)
   end
 
+  def evaluate(node = %AST.InfixExpression{}) do
+    left = evaluate(node.left)
+    right = evaluate(node.right)
+    eval_infix(node.token.type, left, right)
+  end
+
   def evaluate(nil),
     do: %Object{type: :null, value: nil}
 
@@ -39,12 +45,24 @@ defmodule Monkeylang.Evaluator do
     raise "cannot handle node #{inspect(node)}"
   end
 
-  def eval_prefix(:bang, %Object{type: :boolean, value: value}),
+  defp eval_infix(:plus, left = %Object{type: :integer}, right = %Object{type: :integer}),
+    do: %Object{type: :integer, value: left.value + right.value}
+
+  defp eval_infix(:minus, left = %Object{type: :integer}, right = %Object{type: :integer}),
+    do: %Object{type: :integer, value: left.value - right.value}
+
+  defp eval_infix(:asterisk, left = %Object{type: :integer}, right = %Object{type: :integer}),
+    do: %Object{type: :integer, value: left.value * right.value}
+
+  defp eval_infix(:slash, left = %Object{type: :integer}, right = %Object{type: :integer}),
+    do: %Object{type: :integer, value: left.value / right.value}
+
+  defp eval_prefix(:bang, %Object{type: :boolean, value: value}),
     do: %Object{type: :boolean, value: not value}
 
-  def eval_prefix(:bang, %Object{type: type}),
+  defp eval_prefix(:bang, %Object{type: type}),
     do: raise("type #{type} not supported for `!`-operator")
 
-  def eval_prefix(:minus, %Object{type: :integer, value: value}),
+  defp eval_prefix(:minus, %Object{type: :integer, value: value}),
     do: %Object{type: :integer, value: -value}
 end
