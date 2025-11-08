@@ -49,10 +49,8 @@ tokens =
   Monkeylang.Lexer.tokenize(input6)
   |> dbg(limit: :infinity)
 
-{statements, errors} =
+{program, errors} =
   Monkeylang.Parser.parse_tokens(tokens)
   |> dbg()
 
-statements
-|> Enum.each(&IO.puts/1)
-# |> Enum.each(&Monkeylang.Evaluator.evaluate/1)
+IO.puts(program)

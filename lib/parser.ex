@@ -26,7 +26,11 @@ defmodule Monkeylang.Parser do
     :lparen
   ]
 
-  def parse_tokens(tokens), do: parse_statements(tokens, [], [])
+  def parse_tokens(tokens) do
+    {statements, errors} = parse_statements(tokens, [], [])
+    program = %Monkeylang.AST.Program{statements: statements}
+    {program, errors}
+  end
 
   defp parse_statements([], statements, errors),
     do: {Enum.reverse(statements), errors}

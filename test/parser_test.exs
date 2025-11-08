@@ -7,9 +7,11 @@ defmodule ParserTest do
       1 + 2 + 3
     """
 
-    {[node | _], _errors = []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
+
+    [node | _] = program.statements
 
     # |> dbg()
 
@@ -43,11 +45,9 @@ defmodule ParserTest do
       true != false;
     """
 
-    {statements, _errors} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
-
-    # |> dbg()
 
     expected = [
       %Monkeylang.AST.InfixExpression{
@@ -86,7 +86,7 @@ defmodule ParserTest do
 
     # IO.puts(hd(statements))
     # IO.puts(hd(tl(statements)))
-    assert statements == expected
+    assert program.statements == expected
   end
 
   test "test grouped" do
@@ -94,11 +94,11 @@ defmodule ParserTest do
       (1 + 2) * 3;
     """
 
-    {[node | _], []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
 
-    # |> dbg()
+    [node | _] = program.statements
 
     expected = %Monkeylang.AST.InfixExpression{
       token: %Monkeylang.Token{type: :asterisk, literal: "*", precedence: 4},
@@ -131,9 +131,11 @@ defmodule ParserTest do
       if (x < y) { x } else { y };
     """
 
-    {[node | _], []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
+
+    [node | _] = program.statements
 
     expected =
       %Monkeylang.AST.IfExpression{
@@ -178,9 +180,11 @@ defmodule ParserTest do
       fn(a, b) { return a > b };
     """
 
-    {[node | _], []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
+
+    [node | _] = program.statements
 
     expected = %Monkeylang.AST.FunctionLiteral{
       token: %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
@@ -236,9 +240,11 @@ defmodule ParserTest do
       fn() { return 1 + 1};
     """
 
-    {[node | _], []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
+
+    [node | _] = program.statements
 
     expected = %Monkeylang.AST.FunctionLiteral{
       token: %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
@@ -277,9 +283,11 @@ defmodule ParserTest do
       add(1, 2 * 3, add(4 + 5 * 1, -2));
     """
 
-    {[node | _], []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
+
+    [node | _] = program.statements
 
     expected = %Monkeylang.AST.CallExpression{
       token: %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
@@ -364,9 +372,11 @@ defmodule ParserTest do
       let asdf = 1;
     """
 
-    {[node | _], []} =
+    {program, _errors = []} =
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
+
+    [node | _] = program.statements
 
     expected = %Monkeylang.AST.Let{
       name: %Monkeylang.Token{type: :ident, literal: "asdf", precedence: 0},

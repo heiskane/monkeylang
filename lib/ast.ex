@@ -4,17 +4,13 @@ defmodule Monkeylang.AST.Program do
   @enforce_keys [:statements]
   defstruct [:statements]
 
-  @type t :: %__MODULE__{statements: term()}
-end
+  @type t :: %__MODULE__{statements: list(struct())}
 
-defmodule Monkeylang.AST.ExpressionStatement do
-  @enforce_keys [:token, :expression]
-  defstruct [:token, :expression]
-
-  @type t :: %__MODULE__{
-          token: Monkeylang.Token.t(),
-          expression: term()
-        }
+  defimpl String.Chars, for: Monkeylang.AST.Program do
+    def to_string(node = %Monkeylang.AST.Program{}) do
+      Enum.join(node.statements, ";\n")
+    end
+  end
 end
 
 defmodule Monkeylang.AST.Let do
