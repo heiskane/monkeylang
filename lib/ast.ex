@@ -136,8 +136,8 @@ defmodule Monkeylang.AST.IfExpression do
   @type t :: %__MODULE__{
           token: Monkeylang.Token.t(),
           condition: term(),
-          consequence: term(),
-          alternative: term() | nil
+          consequence: Monekeylang.AST.BlockStatement.t(),
+          alternative: Monekeylang.AST.BlockStatement.t() | nil
         }
 
   defimpl String.Chars, for: Monkeylang.AST.IfExpression do

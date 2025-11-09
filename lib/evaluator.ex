@@ -30,10 +30,28 @@ defmodule Monkeylang.Evaluator do
     eval_infix(node.token.type, left, right)
   end
 
+  def evaluate(node = %AST.IfExpression{}) do
+    condition = evaluate(node.condition)
+
+    case condition do
+      %Object{type: :boolean, value: true} -> evaluate(node.consequence)
+      %Object{type: :boolean, value: false} -> evaluate(node.alternative)
+      _ -> raise "if condition did not evaluate to a boolean, #{inspect(condition)}"
+    end
+  end
+
   def evaluate(nil),
     do: %Object{type: :null, value: nil}
 
-  # TODO: what is this supposed to do??
+  # TODO: what is this supposed to do?? just loopy loop
+  def evaluate(%AST.BlockStatement{statements: statements}) do
+    case length(statements) > 0 do
+      true -> evaluate(hd(statements))
+      false -> nil
+    end
+  end
+
+  # TODO: what is this supposed to do?? just loopy loop
   def evaluate(%AST.Program{statements: statements}) do
     case length(statements) > 0 do
       true -> evaluate(hd(statements))
