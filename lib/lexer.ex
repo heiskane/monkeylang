@@ -102,11 +102,13 @@ defmodule Monkeylang.Lexer do
     do_tokenize(tail, [token | tokens])
   end
 
+  defp read_number([], number), do: {number, []}
   defp read_number(input = [char | _tail], number) when not is_digit(char), do: {number, input}
 
   defp read_number([char | tail], number) when is_digit(char),
     do: read_number(tail, number <> char)
 
+  defp read_ident([], ident), do: {ident, []}
   defp read_ident(input = [char | _tail], ident) when not is_letter(char), do: {ident, input}
   defp read_ident([char | tail], ident) when is_letter(char), do: read_ident(tail, ident <> char)
 end

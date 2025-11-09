@@ -89,6 +89,12 @@ defmodule Monkeylang.Evaluator do
       message: "type mismatch for operator #{token_type} with #{left.type} <> #{right.type}"
     }
 
+  defp eval_infix(type, left, right)
+       when type in [:plus, :minus, :asterisk, :slash, :lt, :gt] and
+              not (left.type == :integer and right.type == :integer) do
+    %Error{message: "operator type #{type} not supported for #{left.type} and #{right.type}"}
+  end
+
   defp eval_infix(:plus, left = %Object{type: :integer}, right = %Object{type: :integer}),
     do: %Object{type: :integer, value: left.value + right.value}
 

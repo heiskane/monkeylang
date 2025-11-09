@@ -193,4 +193,9 @@ defmodule LexerTest do
 
     assert Lexer.tokenize(input) == expected
   end
+
+  test "test single line input" do
+    Lexer.tokenize("1 + 1")
+    Lexer.tokenize("a + b")
+  end
 end

@@ -45,4 +45,42 @@ defmodule EvaluatorTest do
 
     %Monkeylang.Error{} = Monkeylang.Evaluator.evaluate(program)
   end
+
+  test "test more errors" do
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("true + true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("true * true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("true / true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("true - true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("true < true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("true > true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+  end
 end
