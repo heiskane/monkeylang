@@ -158,7 +158,16 @@ defmodule Monkeylang.AST.BlockStatement do
 
   defimpl String.Chars, for: Monkeylang.AST.BlockStatement do
     def to_string(node = %Monkeylang.AST.BlockStatement{}) do
-      Enum.reduce(node.statements, "\n", &(&2 <> "  #{&1};\n"))
+      Enum.map(node.statements, &Kernel.to_string/1)
+      |> Enum.map(fn statement ->
+        statement
+        |> String.split("\n")
+        |> Enum.map(&("  " <> "#{&1}"))
+        |> Enum.join("\n")
+        |> then(&("#{&1};"))
+      end)
+      |> Enum.join("\n")
+      |> then(&("\n" <> &1 <> "\n"))
     end
   end
 end
