@@ -70,9 +70,7 @@ defmodule Monkeylang.Evaluator do
   def evaluate(%AST.Program{statements: statements}),
     do: eval_program(statements, %Object{type: :null, value: nil})
 
-  def evaluate(node) do
-    raise "cannot handle node #{inspect(node)}"
-  end
+  def evaluate(node), do: %Error{message: "no handler implemented for node #{inspect(node)}"}
 
   defp eval_block([], previous), do: previous
   defp eval_block(_statements, previous = %ReturnValue{}), do: previous
