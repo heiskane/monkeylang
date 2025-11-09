@@ -46,7 +46,9 @@ input6 = """
 """
 
 input7 = """
-  5
+  if (10 > 1) {
+    return 1;
+  }
 """
 
 tokens =
@@ -60,3 +62,4 @@ tokens =
 IO.puts(program)
 
 Monkeylang.Evaluator.evaluate(program)
+|> dbg()

@@ -8,12 +8,25 @@ defmodule Monkeylang.Object do
         }
 end
 
+defmodule Monkeylang.ReturnValue do
+  @enforce_keys [:value]
+  defstruct [:value]
+
+  @type t :: %__MODULE__{value: term()}
+end
+
 defmodule Monkeylang.Evaluator do
   alias Monkeylang.AST
   alias Monkeylang.Object
+  alias Monkeylang.ReturnValue
 
   def evaluate(node = %AST.Integer{}),
     do: %Object{type: :integer, value: node.value}
+
+  def evaluate(node = %AST.Return{}) do
+    value = evaluate(node.value)
+    %ReturnValue{value: value}
+  end
 
   def evaluate(node = %AST.Boolean{}),
     # TODO: somehow reuse boolean objects
@@ -40,23 +53,21 @@ defmodule Monkeylang.Evaluator do
     end
   end
 
-  def evaluate(nil),
-    do: %Object{type: :null, value: nil}
+  def evaluate(obj = %Object{type: :null}), do: obj
+  def evaluate(nil), do: %Object{type: :null, value: nil}
 
-  # TODO: what is this supposed to do?? just loopy loop
   def evaluate(%AST.BlockStatement{statements: statements}) do
-    case length(statements) > 0 do
-      true -> evaluate(hd(statements))
-      false -> nil
-    end
+    Enum.reduce_while(statements, %Object{type: :null, value: nil}, fn
+      result, _ = %ReturnValue{} -> {:halt, result}
+      node, _ -> {:cont, evaluate(node)}
+    end)
   end
 
-  # TODO: what is this supposed to do?? just loopy loop
   def evaluate(%AST.Program{statements: statements}) do
-    case length(statements) > 0 do
-      true -> evaluate(hd(statements))
-      false -> nil
-    end
+    Enum.reduce_while(statements, %Object{type: :null, value: nil}, fn
+      result, _ = %ReturnValue{} -> {:halt, result.value}
+      node, _ -> {:cont, evaluate(node)}
+    end)
   end
 
   def evaluate(node) do
