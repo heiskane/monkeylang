@@ -47,7 +47,10 @@ input6 = """
 
 input7 = """
   if (10 > 1) {
-    return 2;
+    if (10 > 1) {
+      return 10;
+    }
+
     return 1;
   }
 """
@@ -58,9 +61,9 @@ tokens =
 
 {program, errors} =
   Monkeylang.Parser.parse_tokens(tokens)
-  |> dbg()
+  # |> dbg()
 
 IO.puts(program)
 
 Monkeylang.Evaluator.evaluate(program)
-|> dbg()
+# |> dbg()

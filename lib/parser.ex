@@ -76,10 +76,13 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_prefix([token = %Token{type: :if} | tail], errors) do
+    IO.puts("parsing :if")
+
     {tokens, condition, errors} =
       parse_expression(tail, 0, errors)
 
-    {tokens, block, errors} = parse_block(tokens, errors)
+    {tokens, block, errors} =
+      parse_block(tokens, errors)
 
     {tokens, alternative, errors} =
       case hd(tokens).type do
@@ -195,9 +198,9 @@ defmodule Monkeylang.Parser do
     end
   end
 
-  defp parse_block_statements(tokens = [head | _], errors, statements)
+  defp parse_block_statements([head | tail], errors, statements)
        when head.type in [:rbrace, :eof] do
-    {tokens, Enum.reverse(statements), errors}
+    {tail, Enum.reverse(statements), errors}
   end
 
   defp parse_block_statements([%Token{type: :semicolon} | tail], errors, statements) do
