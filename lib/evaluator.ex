@@ -58,14 +58,14 @@ defmodule Monkeylang.Evaluator do
 
   def evaluate(%AST.BlockStatement{statements: statements}) do
     Enum.reduce_while(statements, %Object{type: :null, value: nil}, fn
-      result, _ = %ReturnValue{} -> {:halt, result}
+      _, prev = %ReturnValue{} -> {:halt, prev}
       node, _ -> {:cont, evaluate(node)}
     end)
   end
 
   def evaluate(%AST.Program{statements: statements}) do
     Enum.reduce_while(statements, %Object{type: :null, value: nil}, fn
-      result, _ = %ReturnValue{} -> {:halt, result.value}
+      _, prev = %ReturnValue{} -> {:halt, prev.value}
       node, _ -> {:cont, evaluate(node)}
     end)
   end

@@ -61,9 +61,9 @@ tokens =
 
 {program, errors} =
   Monkeylang.Parser.parse_tokens(tokens)
-  # |> dbg()
+  |> dbg()
 
 IO.puts(program)
 
 Monkeylang.Evaluator.evaluate(program)
-# |> dbg()
+|> dbg()
