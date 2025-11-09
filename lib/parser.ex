@@ -54,6 +54,10 @@ defmodule Monkeylang.Parser do
     parse_statements(rest, [statement | statements], errors)
   end
 
+  defp parse_statement([%Token{type: :semicolon} | tail], errors) do
+    parse_statement(tail, errors)
+  end
+
   defp parse_statement(tokens = [%Token{type: :let} | _], errors) do
     handle_let(tokens, errors)
   end
@@ -182,9 +186,12 @@ defmodule Monkeylang.Parser do
     parse_infix(tokens, infix, precedence, errors)
   end
 
+  # TODO: handle bare blocks
   defp parse_block(tokens = [head | _], errors) do
     with {:ok, tokens} <- assert_peek(tokens, :lbrace) do
-      {tokens, statements, errors} = parse_block_statements(tokens, errors, [])
+      {tokens, statements, errors} =
+        parse_block_statements(tokens, errors, [])
+
       block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
       {tokens, block, errors}
     else
@@ -201,7 +208,7 @@ defmodule Monkeylang.Parser do
     {tail, statement, errors} =
       parse_statement(tokens, errors)
 
-    {tl(tail), [statement | statements], errors}
+    parse_block_statements(tail, errors, [statement | statements])
   end
 
   defp parse_function_params([%Token{type: :rparen} | tail], errors, params),
