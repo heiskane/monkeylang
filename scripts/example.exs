@@ -51,6 +51,7 @@ input7 = """
       return -(10 + 5 * 8);
     } else {
       123;
+      456;
     }
 
     return 1;
