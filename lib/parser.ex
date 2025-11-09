@@ -54,10 +54,6 @@ defmodule Monkeylang.Parser do
     parse_statements(rest, [statement | statements], errors)
   end
 
-  defp parse_statement([%Token{type: :semicolon} | tail], errors) do
-    parse_statement(tail, errors)
-  end
-
   defp parse_statement(tokens = [%Token{type: :let} | _], errors) do
     handle_let(tokens, errors)
   end
@@ -202,6 +198,10 @@ defmodule Monkeylang.Parser do
   defp parse_block_statements(tokens = [head | _], errors, statements)
        when head.type in [:rbrace, :eof] do
     {tokens, Enum.reverse(statements), errors}
+  end
+
+  defp parse_block_statements([%Token{type: :semicolon} | tail], errors, statements) do
+    parse_block_statements(tail, errors, statements)
   end
 
   defp parse_block_statements(tokens, errors, statements) do
