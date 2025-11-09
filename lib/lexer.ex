@@ -11,13 +11,13 @@ defmodule Monkeylang.Lexer do
     "return" => :return
   }
 
-  defmacro is_digit(ch) do
+  defmacrop is_digit(ch) do
     quote do
       "0" <= unquote(ch) and unquote(ch) <= "9"
     end
   end
 
-  defmacro is_letter(ch) do
+  defmacrop is_letter(ch) do
     quote do
       ("a" <= unquote(ch) and unquote(ch) <= "z") or
         ("A" <= unquote(ch) and unquote(ch) <= "Z") or
@@ -25,7 +25,7 @@ defmodule Monkeylang.Lexer do
     end
   end
 
-  defmacro is_whitespace(ch) do
+  defmacrop is_whitespace(ch) do
     quote do
       unquote(ch) == " " or
         unquote(ch) == "\t" or

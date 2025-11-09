@@ -56,23 +56,23 @@ defmodule Monkeylang.Evaluator do
   def evaluate(obj = %Object{type: :null}), do: obj
   def evaluate(nil), do: %Object{type: :null, value: nil}
 
-  def evaluate(%AST.BlockStatement{statements: statements}) do
-    Enum.reduce_while(statements, %Object{type: :null, value: nil}, fn
-      _, prev = %ReturnValue{} -> {:halt, prev}
-      node, _ -> {:cont, evaluate(node)}
-    end)
-  end
+  def evaluate(%AST.BlockStatement{statements: statements}),
+    do: eval_block(statements, %Object{type: :null, value: nil})
 
-  def evaluate(%AST.Program{statements: statements}) do
-    Enum.reduce_while(statements, %Object{type: :null, value: nil}, fn
-      _, prev = %ReturnValue{} -> {:halt, prev.value}
-      node, _ -> {:cont, evaluate(node)}
-    end)
-  end
+  def evaluate(%AST.Program{statements: statements}),
+    do: eval_program(statements, %Object{type: :null, value: nil})
 
   def evaluate(node) do
     raise "cannot handle node #{inspect(node)}"
   end
+
+  def eval_block(_statements, previous = %ReturnValue{}), do: previous
+  def eval_block([], previous), do: previous
+  def eval_block([head | tail], _previous), do: eval_block(tail, evaluate(head))
+
+  def eval_program(_statements, previous = %ReturnValue{}), do: previous.value
+  def eval_program([], previous), do: previous
+  def eval_program([head | tail], _previous), do: eval_program(tail, evaluate(head))
 
   defp eval_infix(:plus, left = %Object{type: :integer}, right = %Object{type: :integer}),
     do: %Object{type: :integer, value: left.value + right.value}

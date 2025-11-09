@@ -1,5 +1,6 @@
 defmodule Monkeylang.Parser do
   alias Monkeylang.Token
+  alias Monkeylang.AST.Program
 
   @precedences %{
     :equals => 1,
@@ -26,6 +27,7 @@ defmodule Monkeylang.Parser do
     :lparen
   ]
 
+  @spec parse_tokens(list(Token.t())) :: {Program.t(), list(String.t())}
   def parse_tokens(tokens) do
     {statements, errors} = parse_statements(tokens, [], [])
     program = %Monkeylang.AST.Program{statements: statements}
