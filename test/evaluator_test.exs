@@ -83,4 +83,18 @@ defmodule EvaluatorTest do
       |> elem(0)
       |> Monkeylang.Evaluator.evaluate()
   end
+
+  test "test prefix errors" do
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("-true")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+
+    %Monkeylang.Error{} =
+      Monkeylang.Lexer.tokenize("!5")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate()
+  end
 end

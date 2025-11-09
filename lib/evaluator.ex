@@ -126,8 +126,11 @@ defmodule Monkeylang.Evaluator do
     do: %Object{type: :boolean, value: not value}
 
   defp eval_prefix(:bang, %Object{type: type}),
-    do: raise("type #{type} not supported for `!`-operator")
+    do: %Monkeylang.Error{message: "type #{type} not supported for `!`-operator"}
 
   defp eval_prefix(:minus, %Object{type: :integer, value: value}),
     do: %Object{type: :integer, value: -value}
+
+  defp eval_prefix(:minus, %Object{type: type}),
+    do: %Error{message: "type #{type} not supported for `-`-operator"}
 end
