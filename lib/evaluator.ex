@@ -66,8 +66,8 @@ defmodule Monkeylang.Evaluator do
     raise "cannot handle node #{inspect(node)}"
   end
 
-  def eval_block(_statements, previous = %ReturnValue{}), do: previous
   def eval_block([], previous), do: previous
+  def eval_block(_statements, previous = %ReturnValue{}), do: previous
   def eval_block([head | tail], _previous), do: eval_block(tail, evaluate(head))
 
   def eval_program(_statements, previous = %ReturnValue{}), do: previous.value
