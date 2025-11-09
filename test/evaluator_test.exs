@@ -2,7 +2,7 @@ defmodule EvaluatorTest do
   use ExUnit.Case
   doctest Monkeylang.Evaluator
 
-  test "test basic parsing" do
+  test "test return in nested statement" do
     input = """
     if (10 > 1) {
       if (10 > 1) {
@@ -19,5 +19,30 @@ defmodule EvaluatorTest do
 
     result = Monkeylang.Evaluator.evaluate(program)
     assert result == %Monkeylang.Object{type: :integer, value: 10}
+  end
+
+  test "test basic error" do
+    input = """
+      true + 1
+    """
+
+    {program, []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    %Monkeylang.Error{} = Monkeylang.Evaluator.evaluate(program)
+  end
+
+  test "test error early exit" do
+    input = """
+      true + 1;
+      1 + 1;
+    """
+
+    {program, []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    %Monkeylang.Error{} = Monkeylang.Evaluator.evaluate(program)
   end
 end

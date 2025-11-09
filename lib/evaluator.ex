@@ -15,8 +15,16 @@ defmodule Monkeylang.ReturnValue do
   @type t :: %__MODULE__{value: term()}
 end
 
+defmodule Monkeylang.Error do
+  @enforce_keys [:message]
+  defstruct [:message]
+
+  @type t :: %__MODULE__{message: String.t()}
+end
+
 defmodule Monkeylang.Evaluator do
   alias Monkeylang.AST
+  alias Monkeylang.Error
   alias Monkeylang.Object
   alias Monkeylang.ReturnValue
 
@@ -68,11 +76,18 @@ defmodule Monkeylang.Evaluator do
 
   def eval_block([], previous), do: previous
   def eval_block(_statements, previous = %ReturnValue{}), do: previous
+  def eval_block(_statements, previous = %Error{}), do: previous
   def eval_block([head | tail], _previous), do: eval_block(tail, evaluate(head))
 
   def eval_program(_statements, previous = %ReturnValue{}), do: previous.value
+  def eval_program(_statements, previous = %Error{}), do: previous
   def eval_program([], previous), do: previous
   def eval_program([head | tail], _previous), do: eval_program(tail, evaluate(head))
+
+  defp eval_infix(token_type, left, right) when left.type != right.type,
+    do: %Error{
+      message: "type mismatch for operator #{token_type} with #{left.type} <> #{right.type}"
+    }
 
   defp eval_infix(:plus, left = %Object{type: :integer}, right = %Object{type: :integer}),
     do: %Object{type: :integer, value: left.value + right.value}
