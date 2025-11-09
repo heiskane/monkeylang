@@ -76,13 +76,8 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_prefix([token = %Token{type: :if} | tail], errors) do
-    IO.puts("parsing :if")
-
-    {tokens, condition, errors} =
-      parse_expression(tail, 0, errors)
-
-    {tokens, block, errors} =
-      parse_block(tokens, errors)
+    {tokens, condition, errors} = parse_expression(tail, 0, errors)
+    {tokens, block, errors} = parse_block(tokens, errors)
 
     {tokens, alternative, errors} =
       case hd(tokens).type do
