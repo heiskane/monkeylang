@@ -74,15 +74,15 @@ defmodule Monkeylang.Evaluator do
     raise "cannot handle node #{inspect(node)}"
   end
 
-  def eval_block([], previous), do: previous
-  def eval_block(_statements, previous = %ReturnValue{}), do: previous
-  def eval_block(_statements, previous = %Error{}), do: previous
-  def eval_block([head | tail], _previous), do: eval_block(tail, evaluate(head))
+  defp eval_block([], previous), do: previous
+  defp eval_block(_statements, previous = %ReturnValue{}), do: previous
+  defp eval_block(_statements, previous = %Error{}), do: previous
+  defp eval_block([head | tail], _previous), do: eval_block(tail, evaluate(head))
 
-  def eval_program(_statements, previous = %ReturnValue{}), do: previous.value
-  def eval_program(_statements, previous = %Error{}), do: previous
-  def eval_program([], previous), do: previous
-  def eval_program([head | tail], _previous), do: eval_program(tail, evaluate(head))
+  defp eval_program(_statements, previous = %ReturnValue{}), do: previous.value
+  defp eval_program(_statements, previous = %Error{}), do: previous
+  defp eval_program([], previous), do: previous
+  defp eval_program([head | tail], _previous), do: eval_program(tail, evaluate(head))
 
   defp eval_infix(token_type, left, right) when left.type != right.type,
     do: %Error{

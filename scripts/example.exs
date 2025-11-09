@@ -48,7 +48,7 @@ input6 = """
 input7 = """
   if (10 > 1) {
     if (10 > 1) {
-      return 10;
+      return -(10 + 5 * 8);
     }
 
     return 1;
