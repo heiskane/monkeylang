@@ -46,7 +46,7 @@ input6 = """
 """
 
 input7 = """
-  if (true > 1) {
+  if (10 > 1) {
     if (10 > 1) {
       return -(10 + 5 * 8);
     } else {
@@ -58,8 +58,12 @@ input7 = """
   }
 """
 
+input8 = """
+  (true + 1) * 5
+"""
+
 tokens =
-  Monkeylang.Lexer.tokenize(input7)
+  Monkeylang.Lexer.tokenize(input8)
   |> dbg(limit: :infinity)
 
 {program, errors} =

@@ -28,12 +28,16 @@ defmodule Monkeylang.Evaluator do
   alias Monkeylang.Object
   alias Monkeylang.ReturnValue
 
+  @spec evaluate(term()) :: Object.t() | Error.t()
   def evaluate(node = %AST.Integer{}),
     do: %Object{type: :integer, value: node.value}
 
   def evaluate(node = %AST.Return{}) do
-    value = evaluate(node.value)
-    %ReturnValue{value: value}
+    with %Object{} = value <- evaluate(node.value) do
+      %ReturnValue{value: value}
+    else
+      %Error{} = error -> error
+    end
   end
 
   def evaluate(node = %AST.Boolean{}),
@@ -41,24 +45,28 @@ defmodule Monkeylang.Evaluator do
     do: %Object{type: :boolean, value: node.value}
 
   def evaluate(node = %AST.PrefixExpression{}) do
-    right = evaluate(node.right)
-    eval_prefix(node.token.type, right)
+    with %Object{} = right <- evaluate(node.right) do
+      eval_prefix(node.token.type, right)
+    else
+      %Error{} = error -> error
+    end
   end
 
   def evaluate(node = %AST.InfixExpression{}) do
-    left = evaluate(node.left)
-    right = evaluate(node.right)
-    eval_infix(node.token.type, left, right)
+    with %Object{} = left <- evaluate(node.left),
+         %Object{} = right <- evaluate(node.right) do
+      eval_infix(node.token.type, left, right)
+    else
+      %Error{} = error -> error
+    end
   end
 
   def evaluate(node = %AST.IfExpression{}) do
-    condition = evaluate(node.condition)
-
-    case condition do
+    case evaluate(node.condition) do
       error = %Error{} -> error
       %Object{type: :boolean, value: true} -> evaluate(node.consequence)
       %Object{type: :boolean, value: false} -> evaluate(node.alternative)
-      _ -> %Error{message: "if condition did not evaluate to a boolean, #{inspect(condition)}"}
+      node -> %Error{message: "if condition did not evaluate to a boolean, #{inspect(node)}"}
     end
   end
 
