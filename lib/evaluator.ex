@@ -55,6 +55,7 @@ defmodule Monkeylang.Evaluator do
     condition = evaluate(node.condition)
 
     case condition do
+      error = %Error{} -> error
       %Object{type: :boolean, value: true} -> evaluate(node.consequence)
       %Object{type: :boolean, value: false} -> evaluate(node.alternative)
       _ -> %Error{message: "if condition did not evaluate to a boolean, #{inspect(condition)}"}
