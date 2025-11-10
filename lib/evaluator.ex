@@ -57,7 +57,7 @@ defmodule Monkeylang.Evaluator do
     case condition do
       %Object{type: :boolean, value: true} -> evaluate(node.consequence)
       %Object{type: :boolean, value: false} -> evaluate(node.alternative)
-      _ -> raise "if condition did not evaluate to a boolean, #{inspect(condition)}"
+      _ -> %Error{message: "if condition did not evaluate to a boolean, #{inspect(condition)}"}
     end
   end
 
@@ -70,6 +70,7 @@ defmodule Monkeylang.Evaluator do
   def evaluate(%AST.Program{statements: statements}),
     do: eval_program(statements, %Object{type: :null, value: nil})
 
+  def evaluate(node = %Error{}), do: node
   def evaluate(node), do: %Error{message: "no handler implemented for node #{inspect(node)}"}
 
   defp eval_block([], previous), do: previous
