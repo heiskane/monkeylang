@@ -37,9 +37,8 @@ defmodule Monkeylang.Evaluator do
     do: %Object{type: :integer, value: node.value}
 
   def evaluate(node = %AST.Return{}) do
-    with %Object{} = value <- evaluate(node.value) do
-      %ReturnValue{value: value}
-    else
+    case evaluate(node.value) do
+      %Object{} = value -> %ReturnValue{value: value}
       %Error{} = error -> error
     end
   end
