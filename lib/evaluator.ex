@@ -28,6 +28,10 @@ defmodule Monkeylang.Evaluator do
   alias Monkeylang.Object
   alias Monkeylang.ReturnValue
 
+  # Less memory usage when these are pre-defined?
+  @yea %Object{type: :boolean, value: true}
+  @nah %Object{type: :boolean, value: false}
+
   @spec evaluate(term()) :: Object.t() | Error.t()
   def evaluate(node = %AST.Integer{}),
     do: %Object{type: :integer, value: node.value}
@@ -40,9 +44,7 @@ defmodule Monkeylang.Evaluator do
     end
   end
 
-  def evaluate(node = %AST.Boolean{}),
-    # TODO: somehow reuse boolean objects
-    do: %Object{type: :boolean, value: node.value}
+  def evaluate(node = %AST.Boolean{}), do: to_boolean(node.value)
 
   def evaluate(node = %AST.PrefixExpression{}) do
     with %Object{} = right <- evaluate(node.right) do
@@ -64,8 +66,8 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node = %AST.IfExpression{}) do
     case evaluate(node.condition) do
       error = %Error{} -> error
-      %Object{type: :boolean, value: true} -> evaluate(node.consequence)
-      %Object{type: :boolean, value: false} -> evaluate(node.alternative)
+      @yea -> evaluate(node.consequence)
+      @nah -> evaluate(node.alternative)
       node -> %Error{message: "if condition did not evaluate to a boolean, #{inspect(node)}"}
     end
   end
@@ -116,22 +118,23 @@ defmodule Monkeylang.Evaluator do
     do: %Object{type: :integer, value: left.value / right.value}
 
   defp eval_infix(:lt, left = %Object{type: :integer}, right = %Object{type: :integer}),
-    do: %Object{type: :boolean, value: left.value < right.value}
+    do: to_boolean(left.value < right.value)
 
   defp eval_infix(:gt, left = %Object{type: :integer}, right = %Object{type: :integer}),
-    do: %Object{type: :boolean, value: left.value > right.value}
+    do: to_boolean(left.value > right.value)
 
-  defp eval_infix(:equals, left = %Object{}, right = %Object{}) when left.type != right.type,
-    do: %Object{type: :boolean, value: false}
+  defp eval_infix(:equals, left = %Object{}, right = %Object{})
+       when left.type != right.type,
+       do: @nah
 
   defp eval_infix(:equals, left = %Object{}, right = %Object{}) when left.type == right.type,
     do: %Object{type: left.type, value: left.value == right.value}
 
   defp eval_infix(:notequals, left = %Object{}, right = %Object{}),
-    do: %Object{type: :boolean, value: left.value != right.value}
+    do: to_boolean(left.value != right.value)
 
   defp eval_prefix(:bang, %Object{type: :boolean, value: value}),
-    do: %Object{type: :boolean, value: not value}
+    do: to_boolean(not value)
 
   defp eval_prefix(:bang, %Object{type: type}),
     do: %Monkeylang.Error{message: "type #{type} not supported for `!`-operator"}
@@ -141,4 +144,7 @@ defmodule Monkeylang.Evaluator do
 
   defp eval_prefix(:minus, %Object{type: type}),
     do: %Error{message: "type #{type} not supported for `-`-operator"}
+
+  defp to_boolean(true), do: @yea
+  defp to_boolean(false), do: @nah
 end
