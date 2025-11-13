@@ -25,7 +25,7 @@ defmodule Monkeylang.AST.Let do
 
   defimpl String.Chars, for: Monkeylang.AST.Let do
     def to_string(node = %Monkeylang.AST.Let{}) do
-      "let #{node.name.literal} = #{node.value}"
+      "let #{node.name} = #{node.value}"
     end
   end
 end

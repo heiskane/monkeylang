@@ -27,71 +27,104 @@ defmodule Monkeylang.Evaluator do
   alias Monkeylang.Error
   alias Monkeylang.Object
   alias Monkeylang.ReturnValue
+  alias Monkeylang.Environment
 
   # Less memory usage when these are pre-defined?
   @yea %Object{type: :boolean, value: true}
   @nah %Object{type: :boolean, value: false}
 
-  @spec evaluate(term()) :: Object.t() | Error.t()
-  def evaluate(node = %AST.Integer{}),
-    do: %Object{type: :integer, value: node.value}
+  @spec evaluate(term(), map()) :: {Object.t() | Error.t(), map()}
+  def evaluate(node = %AST.Integer{}, env),
+    do: {%Object{type: :integer, value: node.value}, env}
 
-  def evaluate(node = %AST.Return{}) do
-    case evaluate(node.value) do
-      %Object{} = value -> %ReturnValue{value: value}
-      %Error{} = error -> error
+  def evaluate(node = %AST.Return{}, env) do
+    {value, env} = evaluate(node.value, env)
+
+    cond do
+      match?(%Object{}, value) -> {%ReturnValue{value: value}, env}
+      match?(%Error{}, value) -> {value, env}
     end
   end
 
-  def evaluate(node = %AST.Boolean{}), do: to_boolean(node.value)
+  def evaluate(node = %AST.Boolean{}, env), do: {to_boolean(node.value), env}
 
-  def evaluate(node = %AST.PrefixExpression{}) do
-    with %Object{} = right <- evaluate(node.right) do
-      eval_prefix(node.token.type, right)
+  def evaluate(node = %AST.PrefixExpression{}, env) do
+    {right, env} = evaluate(node.right, env)
+
+    cond do
+      match?(%Object{}, right) -> {eval_prefix(node.token.type, right), env}
+      match?(%Error{}, right) -> {right, env}
+    end
+  end
+
+  def evaluate(node = %AST.InfixExpression{}, env) do
+    with {%Object{} = left, env} <- evaluate(node.left, env),
+         {%Object{} = right, env} <- evaluate(node.right, env) do
+      value = eval_infix(node.token.type, left, right)
+      {value, env}
     else
-      %Error{} = error -> error
+      {%Error{} = error, env} -> {error, env}
     end
   end
 
-  def evaluate(node = %AST.InfixExpression{}) do
-    with %Object{} = left <- evaluate(node.left),
-         %Object{} = right <- evaluate(node.right) do
-      eval_infix(node.token.type, left, right)
-    else
-      %Error{} = error -> error
+  def evaluate(node = %AST.IfExpression{}, env) do
+    case evaluate(node.condition, env) do
+      {%Error{} = error, env} ->
+        {error, env}
+
+      {@yea, env} ->
+        evaluate(node.consequence, env)
+
+      {@nah, env} ->
+        evaluate(node.alternative, env)
+
+      {node, env} ->
+        {%Error{message: "if condition did not evaluate to a boolean, #{inspect(node)}"}, env}
     end
   end
 
-  def evaluate(node = %AST.IfExpression{}) do
-    case evaluate(node.condition) do
-      error = %Error{} -> error
-      @yea -> evaluate(node.consequence)
-      @nah -> evaluate(node.alternative)
-      node -> %Error{message: "if condition did not evaluate to a boolean, #{inspect(node)}"}
-    end
+  def evaluate(node = %AST.Let{}, env) do
+    {object, env} = evaluate(node.value, env)
+    env = Environment.set(env, node.name, object)
+    {%Object{type: :null, value: nil}, env}
   end
 
-  def evaluate(obj = %Object{type: :null}), do: obj
-  def evaluate(nil), do: %Object{type: :null, value: nil}
+  def evaluate(node = %AST.Ident{}, env) do
+    object = Environment.get(env, node.value)
+    {object, env}
+  end
 
-  def evaluate(%AST.BlockStatement{statements: statements}),
-    do: eval_block(statements, %Object{type: :null, value: nil})
+  def evaluate(obj = %Object{type: :null}, env), do: {obj, env}
+  def evaluate(nil, env), do: {%Object{type: :null, value: nil}, env}
 
-  def evaluate(%AST.Program{statements: statements}),
-    do: eval_program(statements, %Object{type: :null, value: nil})
+  def evaluate(%AST.BlockStatement{statements: statements}, env),
+    do: eval_block(statements, {%Object{type: :null, value: nil}, env})
 
-  def evaluate(node = %Error{}), do: node
-  def evaluate(node), do: %Error{message: "no handler implemented for node #{inspect(node)}"}
+  def evaluate(%AST.Program{statements: statements}, env),
+    do: eval_program(statements, {%Object{type: :null, value: nil}, env})
 
-  defp eval_block([], previous), do: previous
-  defp eval_block(_statements, previous = %ReturnValue{}), do: previous
-  defp eval_block(_statements, previous = %Error{}), do: previous
-  defp eval_block([head | tail], _previous), do: eval_block(tail, evaluate(head))
+  def evaluate(node = %Error{}, env), do: {node, env}
 
-  defp eval_program(_statements, previous = %ReturnValue{}), do: previous.value
-  defp eval_program(_statements, previous = %Error{}), do: previous
-  defp eval_program([], previous), do: previous
-  defp eval_program([head | tail], _previous), do: eval_program(tail, evaluate(head))
+  def evaluate(node, env),
+    do: {%Error{message: "no handler implemented for node #{inspect(node)}"}, env}
+
+  defp eval_block([], {previous, env}), do: {previous, env}
+  defp eval_block(_statements, {previous = %ReturnValue{}, env}), do: {previous, env}
+  defp eval_block(_statements, {previous = %Error{}, env}), do: {previous, env}
+
+  defp eval_block([head | tail], {_previous, env}) do
+    {result, env} = evaluate(head, env)
+    eval_block(tail, {result, env})
+  end
+
+  defp eval_program(_statements, {previous = %ReturnValue{}, env}), do: {previous.value, env}
+  defp eval_program(_statements, {previous = %Error{}, env}), do: {previous, env}
+  defp eval_program([], {previous, env}), do: {previous, env}
+
+  defp eval_program([head | tail], {_previous, env}) do
+    {result, env} = evaluate(head, env)
+    eval_program(tail, {result, env})
+  end
 
   defp eval_infix(token_type, left, right) when left.type != right.type,
     do: %Error{

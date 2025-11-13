@@ -251,7 +251,7 @@ defmodule Monkeylang.Parser do
 
     node = %Monkeylang.AST.Let{
       token: token,
-      name: ident,
+      name: ident.literal,
       value: expression
     }
 
