@@ -104,4 +104,33 @@ defmodule EvaluatorTest do
       |> elem(0)
       |> Monkeylang.Evaluator.evaluate(env)
   end
+
+  test "test let statement" do
+    env = Monkeylang.Environment.new()
+
+    {_output, env} =
+      Monkeylang.Lexer.tokenize("let a = 123;")
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate(env)
+
+    assert Monkeylang.Environment.get(env, "a") == %Monkeylang.Object{type: :integer, value: 123}
+
+    input = """
+      let a = 123;
+      let b = 456;
+      let c = a * b;
+    """
+
+    {_output, env} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate(env)
+
+    assert Monkeylang.Environment.get(env, "c") == %Monkeylang.Object{
+             type: :integer,
+             value: 56088
+           }
+  end
 end
