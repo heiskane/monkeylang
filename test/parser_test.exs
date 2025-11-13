@@ -379,7 +379,7 @@ defmodule ParserTest do
     [node | _] = program.statements
 
     expected = %Monkeylang.AST.Let{
-      name: %Monkeylang.Token{type: :ident, literal: "asdf", precedence: 0},
+      name: "asdf",
       value: %Monkeylang.AST.Integer{
         value: 1,
         token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0}

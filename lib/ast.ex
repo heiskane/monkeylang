@@ -84,7 +84,7 @@ defmodule Monkeylang.AST.Integer do
 
   @type t :: %__MODULE__{
           token: Monkeylang.Token.t(),
-          value: Integer.t()
+          value: integer()
         }
 
   defimpl String.Chars, for: Monkeylang.AST.Integer do
@@ -136,8 +136,8 @@ defmodule Monkeylang.AST.IfExpression do
   @type t :: %__MODULE__{
           token: Monkeylang.Token.t(),
           condition: term(),
-          consequence: Monekeylang.AST.BlockStatement.t(),
-          alternative: Monekeylang.AST.BlockStatement.t() | nil
+          consequence: Monkeylang.AST.BlockStatement.t(),
+          alternative: Monkeylang.AST.BlockStatement.t() | nil
         }
 
   defimpl String.Chars, for: Monkeylang.AST.IfExpression do

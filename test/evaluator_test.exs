@@ -17,7 +17,8 @@ defmodule EvaluatorTest do
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
 
-    result = Monkeylang.Evaluator.evaluate(program)
+    env = Monkeylang.Environment.new()
+    {result, _env} = Monkeylang.Evaluator.evaluate(program, env)
     assert result == %Monkeylang.Object{type: :integer, value: 10}
   end
 
@@ -30,7 +31,8 @@ defmodule EvaluatorTest do
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
 
-    %Monkeylang.Error{} = Monkeylang.Evaluator.evaluate(program)
+    env = Monkeylang.Environment.new()
+    {%Monkeylang.Error{}, _env} = Monkeylang.Evaluator.evaluate(program, env)
   end
 
   test "test error early exit" do
@@ -43,58 +45,63 @@ defmodule EvaluatorTest do
       Monkeylang.Lexer.tokenize(input)
       |> Monkeylang.Parser.parse_tokens()
 
-    %Monkeylang.Error{} = Monkeylang.Evaluator.evaluate(program)
+    env = Monkeylang.Environment.new()
+    {%Monkeylang.Error{}, _env} = Monkeylang.Evaluator.evaluate(program, env)
   end
 
   test "test more errors" do
-    %Monkeylang.Error{} =
+    env = Monkeylang.Environment.new()
+
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("true + true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
 
-    %Monkeylang.Error{} =
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("true * true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
 
-    %Monkeylang.Error{} =
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("true / true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
 
-    %Monkeylang.Error{} =
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("true - true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
 
-    %Monkeylang.Error{} =
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("true < true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
 
-    %Monkeylang.Error{} =
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("true > true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
   end
 
   test "test prefix errors" do
-    %Monkeylang.Error{} =
+    env = Monkeylang.Environment.new()
+
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("-true")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
 
-    %Monkeylang.Error{} =
+    {%Monkeylang.Error{}, _env} =
       Monkeylang.Lexer.tokenize("!5")
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
-      |> Monkeylang.Evaluator.evaluate()
+      |> Monkeylang.Evaluator.evaluate(env)
   end
 end
