@@ -86,7 +86,7 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node = %AST.Let{}, env) do
     {object, env} = evaluate(node.value, env)
     env = Environment.set(env, node.name, object)
-    {%Object{type: :null, value: nil}, env}
+    {object, env}
   end
 
   def evaluate(node = %AST.Ident{}, env) do
