@@ -40,9 +40,9 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node = %AST.Return{}, env) do
     {value, env} = evaluate(node.value, env)
 
-    cond do
-      match?(%Object{}, value) -> {%ReturnValue{value: value}, env}
-      match?(%Error{}, value) -> {value, env}
+    case value do
+      %Object{} = value -> {%ReturnValue{value: value}, env}
+      %Error{} = value -> {value, env}
     end
   end
 
@@ -51,9 +51,9 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node = %AST.PrefixExpression{}, env) do
     {right, env} = evaluate(node.right, env)
 
-    cond do
-      match?(%Object{}, right) -> {eval_prefix(node.token.type, right), env}
-      match?(%Error{}, right) -> {right, env}
+    case right do
+      %Object{} = right -> {eval_prefix(node.token.type, right), env}
+      %Error{} = right -> {right, env}
     end
   end
 
