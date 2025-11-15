@@ -67,8 +67,14 @@ input9 = """
   add(1 + 1, 2);
 """
 
+input10 = """
+  let newAdder = fn(x) { fn(y) { x + y } };
+  let addTwo = newAdder(2);
+  addTwo(5);
+"""
+
 tokens =
-  Monkeylang.Lexer.tokenize(input9)
+  Monkeylang.Lexer.tokenize(input10)
   |> dbg(limit: :infinity)
 
 {program, errors} =
