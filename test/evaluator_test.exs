@@ -133,4 +133,24 @@ defmodule EvaluatorTest do
              value: 56088
            }
   end
+
+  test "test function" do
+    env = Monkeylang.Environment.new()
+
+    input = """
+      let add = fn(a, b) { return a + b };
+      add(1 + 1, 2);
+    """
+
+    {output, _env} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate(env)
+
+    assert output == %Monkeylang.Object{
+             type: :integer,
+             value: 4
+           }
+  end
 end
