@@ -15,6 +15,13 @@ defmodule Monkeylang.ReturnValue do
   @type t :: %__MODULE__{value: term()}
 end
 
+defmodule Monkeylang.Function do
+  @enforce_keys [:params, :body, :env]
+  defstruct [:params, :body, :env]
+
+  @type t :: %__MODULE__{params: list(), body: term(), env: term()}
+end
+
 defmodule Monkeylang.Error do
   @enforce_keys [:message]
   defstruct [:message]
@@ -26,6 +33,7 @@ defmodule Monkeylang.Evaluator do
   alias Monkeylang.AST
   alias Monkeylang.Error
   alias Monkeylang.Object
+  alias Monkeylang.Function
   alias Monkeylang.ReturnValue
   alias Monkeylang.Environment
 
@@ -103,10 +111,48 @@ defmodule Monkeylang.Evaluator do
   def evaluate(%AST.Program{statements: statements}, env),
     do: eval_program(statements, {%Object{type: :null, value: nil}, env})
 
+  def evaluate(node = %AST.FunctionLiteral{}, env),
+    do: {%Function{params: node.parameters, body: node.body, env: env}, env}
+
+  def evaluate(node = %AST.CallExpression{}, env) do
+    {function, env} = evaluate(node.function, env)
+
+    case eval_expressions(node.arguments, [], env) do
+      {:ok, {args, env}} -> {apply_function(function, args), env}
+      {:error, error} -> error
+    end
+  end
+
   def evaluate(node = %Error{}, env), do: {node, env}
 
   def evaluate(node, env),
     do: {%Error{message: "no handler implemented for node #{inspect(node)}"}, env}
+
+  def apply_function(function = %Function{}, args) when length(function.params) != length(args),
+    do: %Error{
+      message: "function params given #{length(args)}, needed #{length(function.params)}"
+    }
+
+  def apply_function(function = %Function{}, args) do
+    env =
+      Enum.zip(function.params, args)
+      |> Enum.reduce(function.env, fn {name, value}, acc ->
+        Environment.set(acc, name.value, value)
+      end)
+
+    # Dont care what happens to env inside the function scope
+    {result, _env} = evaluate(function.body, env)
+
+    result
+  end
+
+  defp eval_expressions([], results, env), do: {:ok, {results, env}}
+  defp eval_expressions(_statements, [error = %Error{} | _tail], _env), do: {:error, error}
+
+  defp eval_expressions([head | tail], results, env) do
+    {result, env} = evaluate(head, env)
+    eval_expressions(tail, [result | results], env)
+  end
 
   defp eval_block([], {previous, env}), do: {previous, env}
   defp eval_block(_statements, {previous = %ReturnValue{}, env}), do: {previous, env}

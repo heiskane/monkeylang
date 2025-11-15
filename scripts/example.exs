@@ -34,7 +34,7 @@ input3 = """
 """
 
 input4 = """
-  fn() { return 1 + 1};
+  fn() { return 1 + 1 };
 """
 
 input5 = """
@@ -62,8 +62,13 @@ input8 = """
   (true + 1) * 5
 """
 
+input9 = """
+  let add = fn(a, b) { return a + b };
+  add(1 + 1, 2);
+"""
+
 tokens =
-  Monkeylang.Lexer.tokenize(input7)
+  Monkeylang.Lexer.tokenize(input9)
   |> dbg(limit: :infinity)
 
 {program, errors} =
@@ -72,5 +77,7 @@ tokens =
 
 IO.puts(program)
 
-Monkeylang.Evaluator.evaluate(program)
-|> dbg()
+env = Monkeylang.Environment.new()
+
+{value, env} = Monkeylang.Evaluator.evaluate(program, env)
+dbg(value)
