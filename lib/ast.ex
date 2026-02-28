@@ -94,6 +94,22 @@ defmodule Monkeylang.AST.Integer do
   end
 end
 
+defmodule Monkeylang.AST.String do
+  @enforce_keys [:token, :value]
+  defstruct [:token, :value]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          value: String.t()
+        }
+
+  defimpl String.Chars, for: Monkeylang.AST.String do
+    def to_string(node = %Monkeylang.AST.String{}) do
+      node.token.literal
+    end
+  end
+end
+
 defmodule Monkeylang.AST.PrefixExpression do
   @enforce_keys [:token, :operator, :right]
   defstruct [:token, :operator, :right]

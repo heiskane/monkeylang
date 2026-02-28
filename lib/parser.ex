@@ -67,6 +67,11 @@ defmodule Monkeylang.Parser do
   defp parse_statement(tokens, errors),
     do: parse_expression(tokens, 0, errors)
 
+  defp parse_prefix([token = %Token{type: :string} | tail], errors) do
+    node = %Monkeylang.AST.String{token: token, value: token.literal}
+    {tail, node, errors}
+  end
+
   defp parse_prefix([token = %Token{type: :ident} | tail], errors) do
     node = %Monkeylang.AST.Ident{token: token, value: token.literal}
     {tail, node, errors}
