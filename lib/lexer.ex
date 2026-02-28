@@ -67,22 +67,22 @@ defmodule Monkeylang.Lexer do
   defp do_tokenize(["=", "=" | tail], tokens),
     do: do_tokenize(tail, [Token.new(:equals, "==") | tokens])
 
-  # handle assign
-  defp do_tokenize(["=" | tail], tokens),
-    do: do_tokenize(tail, [Token.new(:assign, "=") | tokens])
-
   # handle not equals
   defp do_tokenize(["!", "=" | tail], tokens),
     do: do_tokenize(tail, [Token.new(:notequals, "!=") | tokens])
 
-  # handle bang
-  defp do_tokenize(["!" | tail], tokens),
-    do: do_tokenize(tail, [Token.new(:bang, "!") | tokens])
+  defp do_tokenize(["\"" | tail], tokens) do
+    {rest, value} = read_string(tail, "")
+    token = Token.new(:string, value)
+    do_tokenize(rest, [token | tokens])
+  end
 
   # handle single charachter tokens
   defp do_tokenize([char | tail], tokens) do
     token =
       case char do
+        "=" -> Token.new(:assign, char)
+        "!" -> Token.new(:bang, char)
         "+" -> Token.new(:plus, char)
         "(" -> Token.new(:lparen, char)
         ")" -> Token.new(:rparen, char)
@@ -111,4 +111,9 @@ defmodule Monkeylang.Lexer do
   defp read_ident([], ident), do: {ident, []}
   defp read_ident(input = [char | _tail], ident) when not is_letter(char), do: {ident, input}
   defp read_ident([char | tail], ident) when is_letter(char), do: read_ident(tail, ident <> char)
+
+  defp read_string([], acc), do: {[], acc}
+  defp read_string(["\"" | tail], acc), do: {tail, acc}
+  defp read_string(["\\", char | tail], acc), do: read_string(tail, acc <> char)
+  defp read_string([char | tail], acc), do: read_string(tail, acc <> char)
 end

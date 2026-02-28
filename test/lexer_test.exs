@@ -198,4 +198,32 @@ defmodule LexerTest do
     Lexer.tokenize("1 + 1")
     Lexer.tokenize("a + b")
   end
+
+  test "test strings" do
+    input = """
+      a = "hello world"
+    """
+
+    expected = [
+      %Monkeylang.Token{literal: "a", precedence: 0, type: :ident},
+      %Monkeylang.Token{literal: "=", precedence: 0, type: :assign},
+      %Monkeylang.Token{literal: "hello world", precedence: 0, type: :string},
+      %Monkeylang.Token{literal: "", precedence: 0, type: :eof}
+    ]
+
+    assert Lexer.tokenize(input) == expected
+
+    input = """
+      a = "hello \\" world"
+    """
+
+    expected = [
+      %Monkeylang.Token{literal: "a", precedence: 0, type: :ident},
+      %Monkeylang.Token{literal: "=", precedence: 0, type: :assign},
+      %Monkeylang.Token{literal: "hello \" world", precedence: 0, type: :string},
+      %Monkeylang.Token{literal: "", precedence: 0, type: :eof}
+    ]
+
+    assert Lexer.tokenize(input) == expected
+  end
 end

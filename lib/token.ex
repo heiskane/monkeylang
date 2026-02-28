@@ -29,7 +29,8 @@ defmodule Monkeylang.Token do
     :false,
     :if,
     :else,
-    :return
+    :return,
+    :string,
   ]
 
   @precedences %{
