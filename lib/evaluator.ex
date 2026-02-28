@@ -45,6 +45,9 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node = %AST.Integer{}, env),
     do: {%Object{type: :integer, value: node.value}, env}
 
+  def evaluate(node = %AST.String{}, env),
+    do: {%Object{type: :string, value: node.value}, env}
+
   def evaluate(node = %AST.Return{}, env) do
     {value, env} = evaluate(node.value, env)
 
@@ -206,7 +209,7 @@ defmodule Monkeylang.Evaluator do
        do: @nah
 
   defp eval_infix(:equals, left = %Object{}, right = %Object{}) when left.type == right.type,
-    do: %Object{type: left.type, value: left.value == right.value}
+    do: to_boolean(left.value == right.value)
 
   defp eval_infix(:notequals, left = %Object{}, right = %Object{}),
     do: to_boolean(left.value != right.value)
