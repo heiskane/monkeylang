@@ -184,7 +184,37 @@ defmodule EvaluatorTest do
 
     assert output == %Monkeylang.Object{
              type: :boolean,
-             value: false,
+             value: false
+           }
+
+    input = """
+      "hello" != "world";
+    """
+
+    {output, _env} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate(env)
+
+    assert output == %Monkeylang.Object{
+             type: :boolean,
+             value: true
+           }
+
+    input = """
+      "hello" + " " + "world";
+    """
+
+    {output, _env} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate(env)
+
+    assert output == %Monkeylang.Object{
+             type: :string,
+             value: "hello world"
            }
   end
 end
