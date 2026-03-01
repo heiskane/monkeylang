@@ -4,7 +4,7 @@ defmodule LexerTest do
 
   alias Monkeylang.Lexer
 
-  test "test lexer2" do
+  test "lexer2" do
     input = "=+(){},;"
 
     tokens =
@@ -83,7 +83,7 @@ defmodule LexerTest do
     assert tokens == expected
   end
 
-  test "test equals" do
+  test "equals" do
     input = """
       a == b;
     """
@@ -102,7 +102,7 @@ defmodule LexerTest do
     assert tokens == expected
   end
 
-  test "test notequals" do
+  test "notequals" do
     input = """
       a != b;
       !a;
@@ -122,7 +122,7 @@ defmodule LexerTest do
     assert Lexer.tokenize(input) == expected
   end
 
-  test "test chapter 1.4" do
+  test "chapter 1.4" do
     input = """
       !-/*5;
       5 < 10 > 5;
@@ -147,7 +147,7 @@ defmodule LexerTest do
     assert Lexer.tokenize(input) == expected
   end
 
-  test "test keywords" do
+  test "keywords" do
     input = """
       let asdf = fn(a) { a + 1 };
       if (5 < 10) {
@@ -194,12 +194,12 @@ defmodule LexerTest do
     assert Lexer.tokenize(input) == expected
   end
 
-  test "test single line input" do
+  test "single line input" do
     Lexer.tokenize("1 + 1")
     Lexer.tokenize("a + b")
   end
 
-  test "test strings" do
+  test "strings" do
     input = """
       a = "hello world"
     """
@@ -234,6 +234,25 @@ defmodule LexerTest do
       %Monkeylang.Token{literal: "a", precedence: 0, type: :ident},
       %Monkeylang.Token{literal: "=", precedence: 0, type: :assign},
       %Monkeylang.Token{literal: "hello \\ world", precedence: 0, type: :string},
+      %Monkeylang.Token{literal: "", precedence: 0, type: :eof}
+    ]
+
+    assert Lexer.tokenize(input) == expected
+  end
+
+  test "arrays" do
+    input = """
+      ["hello", "world", 1]
+    """
+
+    expected = [
+      %Monkeylang.Token{literal: "[", precedence: 0, type: :lbracket},
+      %Monkeylang.Token{literal: "hello", precedence: 0, type: :string},
+      %Monkeylang.Token{literal: ",", precedence: 0, type: :comma},
+      %Monkeylang.Token{literal: "world", precedence: 0, type: :string},
+      %Monkeylang.Token{literal: ",", precedence: 0, type: :comma},
+      %Monkeylang.Token{literal: "1", precedence: 0, type: :int},
+      %Monkeylang.Token{literal: "]", precedence: 0, type: :rbracket},
       %Monkeylang.Token{literal: "", precedence: 0, type: :eof}
     ]
 

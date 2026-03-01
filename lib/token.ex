@@ -31,6 +31,8 @@ defmodule Monkeylang.Token do
     :else,
     :return,
     :string,
+    :lbracket,
+    :rbracket
   ]
 
   @precedences %{

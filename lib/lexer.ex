@@ -89,6 +89,8 @@ defmodule Monkeylang.Lexer do
         ")" -> Token.new(:rparen, char)
         "{" -> Token.new(:lbrace, char)
         "}" -> Token.new(:rbrace, char)
+        "[" -> Token.new(:lbracket, char)
+        "]" -> Token.new(:rbracket, char)
         "," -> Token.new(:comma, char)
         ";" -> Token.new(:semicolon, char)
         "-" -> Token.new(:minus, char)
