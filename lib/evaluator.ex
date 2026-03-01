@@ -206,14 +206,17 @@ defmodule Monkeylang.Evaluator do
     %Error{message: "operator type #{type} not supported for #{left.type} and #{right.type}"}
   end
 
+  defp eval_infix(:plus, left, right) when left.type != right.type,
+    do: %Error{message: "type mismatch for plus operator. got #{left.type} and #{right.type}"}
+
   defp eval_infix(:plus, left = %Object{type: :integer}, right = %Object{type: :integer}),
     do: %Object{type: :integer, value: left.value + right.value}
 
   defp eval_infix(:plus, left = %Object{type: :string}, right = %Object{type: :string}),
     do: %Object{type: :string, value: left.value <> right.value}
 
-  defp eval_infix(:plus, left, right),
-    do: %Error{message: "operator type plus not supported for #{left.type} and #{right.type}"}
+  defp eval_infix(:plus, left, _right),
+    do: %Error{message: "operator type plus not supported for #{left.type}"}
 
   defp eval_infix(:minus, left = %Object{type: :integer}, right = %Object{type: :integer}),
     do: %Object{type: :integer, value: left.value - right.value}
