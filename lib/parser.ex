@@ -28,19 +28,13 @@ defmodule Monkeylang.Parser do
   defp parse_statements([%Token{type: :eof} | _], statements, errors),
     do: {Enum.reverse(statements), errors}
 
-  # semicolons are optional lol
+  # semicolons are optional
   defp parse_statements([%Token{type: :semicolon} | tail], statements, errors),
     do: parse_statements(tail, statements, errors)
 
   defp parse_statements(tokens, statements, errors) do
     {rest, statement, errors} = parse_statement(tokens, errors)
-
-    rest =
-      case rest do
-        [] -> []
-        [_ | tail] -> tail
-      end
-
+    rest = Enum.drop(rest, 1)
     parse_statements(rest, [statement | statements], errors)
   end
 
@@ -75,8 +69,8 @@ defmodule Monkeylang.Parser do
     {tokens, block, errors} = parse_block(tokens, errors)
 
     {tokens, alternative, errors} =
-      case hd(tokens).type do
-        :else -> parse_block(tl(tokens), errors)
+      case tokens do
+        [%Token{type: :else} | tail] -> parse_block(tail, errors)
         _ -> {tokens, nil, errors}
       end
 
@@ -137,8 +131,8 @@ defmodule Monkeylang.Parser do
       {:error, error} -> {tokens, expression, [error | errors]}
     end
 
-    case hd(tokens).type do
-      :rparen -> {tl(tokens), expression, errors}
+    case tokens do
+      [%Token{type: :rparen} | tail] -> {tail, expression, errors}
       _ -> {tokens, nil, errors}
     end
   end
@@ -148,9 +142,7 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_expression(tokens, precedence, errors) do
-    {tokens, left, errors} =
-      parse_prefix(tokens, errors)
-
+    {tokens, left, errors} = parse_prefix(tokens, errors)
     parse_infix(tokens, left, precedence, errors)
   end
 
@@ -163,14 +155,12 @@ defmodule Monkeylang.Parser do
   end
 
   defp parse_infix([token = %Token{type: :lparen} | tail], function, _precedence, errors) do
-    # {tokens, arguments, errors} = parse_call_params(tail, errors, [])
     {tokens, arguments, errors} = parse_expression_list(tail, :rparen, errors, [])
     node = %Monkeylang.AST.CallExpression{token: token, function: function, arguments: arguments}
     {tokens, node, errors}
   end
 
-  defp parse_infix(tokens, left, precedence, errors) do
-    [next | tail] = tokens
+  defp parse_infix([next | tail], left, precedence, errors) do
     {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
 
     infix = %Monkeylang.AST.InfixExpression{
@@ -183,17 +173,10 @@ defmodule Monkeylang.Parser do
     parse_infix(tokens, infix, precedence, errors)
   end
 
-  # TODO: handle bare blocks
-  defp parse_block(tokens = [head | _], errors) do
-    with {:ok, tokens} <- assert_peek(tokens, :lbrace) do
-      {tokens, statements, errors} =
-        parse_block_statements(tokens, errors, [])
-
-      block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
-      {tokens, block, errors}
-    else
-      {:error, msg} -> {tokens, nil, [msg | errors]}
-    end
+  defp parse_block([head = %Token{type: :lbrace} | tail], errors) do
+    {tokens, statements, errors} = parse_block_statements(tail, errors, [])
+    block = %Monkeylang.AST.BlockStatement{token: head, statements: statements}
+    {tokens, block, errors}
   end
 
   defp parse_block_statements([head | tail], errors, statements)
