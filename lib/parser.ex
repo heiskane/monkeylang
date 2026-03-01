@@ -2,19 +2,6 @@ defmodule Monkeylang.Parser do
   alias Monkeylang.Token
   alias Monkeylang.AST.Program
 
-  @precedences %{
-    :equals => 1,
-    :notequals => 1,
-    :lt => 2,
-    :gt => 2,
-    :plus => 3,
-    :minus => 3,
-    :slash => 4,
-    :asterisk => 4,
-    :prefix => 5,
-    :lparen => 6
-  }
-
   @infixable [
     :plus,
     :minus,
@@ -24,7 +11,8 @@ defmodule Monkeylang.Parser do
     :notequals,
     :lt,
     :gt,
-    :lparen
+    :lparen,
+    :lbracket
   ]
 
   @spec parse_tokens(list(Token.t())) :: {Program.t(), list(String.t())}
@@ -121,7 +109,7 @@ defmodule Monkeylang.Parser do
 
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
     {tokens, right, errors} =
-      parse_expression(tail, get_precedence(token.type), errors)
+      parse_expression(tail, Token.get_precedence(token.type), errors)
 
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
     {tokens, node, errors}
@@ -170,8 +158,9 @@ defmodule Monkeylang.Parser do
     do: {tokens, nil, ["no left side for infix" | errors]}
 
   defp parse_infix(tokens = [next | _], left, precedence, errors)
-       when next.type not in @infixable or not (precedence < next.precedence),
-       do: {tokens, left, errors}
+       when next.type not in @infixable or not (precedence < next.precedence) do
+    {tokens, left, errors}
+  end
 
   defp parse_infix([token = %Token{type: :lparen} | tail], function, _precedence, errors) do
     # {tokens, arguments, errors} = parse_call_params(tail, errors, [])
@@ -288,6 +277,4 @@ defmodule Monkeylang.Parser do
       false -> {:error, "expected #{expected} but got #{type}"}
     end
   end
-
-  defp get_precedence(type), do: Map.get(@precedences, type, 0)
 end

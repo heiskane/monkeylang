@@ -145,6 +145,23 @@ defmodule Monkeylang.AST.InfixExpression do
   end
 end
 
+defmodule Monkeylang.AST.IndexExpression do
+  @enforce_keys [:token, :left, :index]
+  defstruct [:token, :left, :index]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          left: term(),
+          index: term()
+        }
+
+  defimpl String.Chars, for: Monkeylang.AST.IndexExpression do
+    def to_string(node = %Monkeylang.AST.IndexExpression{}) do
+      "#{node.left}[#{node.index}]"
+    end
+  end
+end
+
 defmodule Monkeylang.AST.IfExpression do
   @enforce_keys [:token, :condition, :consequence, :alternative]
   defstruct [:token, :condition, :consequence, :alternative]

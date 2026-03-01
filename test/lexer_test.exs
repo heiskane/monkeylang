@@ -246,7 +246,7 @@ defmodule LexerTest do
     """
 
     expected = [
-      %Monkeylang.Token{literal: "[", precedence: 0, type: :lbracket},
+      %Monkeylang.Token{literal: "[", precedence: 7, type: :lbracket},
       %Monkeylang.Token{literal: "hello", precedence: 0, type: :string},
       %Monkeylang.Token{literal: ",", precedence: 0, type: :comma},
       %Monkeylang.Token{literal: "world", precedence: 0, type: :string},

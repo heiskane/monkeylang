@@ -45,7 +45,8 @@ defmodule Monkeylang.Token do
     :slash => 4,
     :asterisk => 4,
     :prefix => 5,
-    :lparen => 6
+    :lparen => 6,
+    :lbracket => 7
   }
 
   # This is not enforced anyway so keep it an atom
@@ -69,4 +70,6 @@ defmodule Monkeylang.Token do
     raise ArgumentError,
           "Invalid token type: #{inspect(type)}. Allowed types: #{@token_types |> Enum.join(", ")}"
   end
+
+  def get_precedence(type), do: Map.get(@precedences, type, 0)
 end

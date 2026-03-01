@@ -421,7 +421,7 @@ defmodule ParserTest do
       |> Monkeylang.Parser.parse_tokens()
 
     expected = %Monkeylang.AST.ArrayLiteral{
-      token: %Monkeylang.Token{type: :lbracket, literal: "[", precedence: 0},
+      token: %Monkeylang.Token{type: :lbracket, literal: "[", precedence: 7},
       elements: [
         %Monkeylang.AST.String{
           token: %Monkeylang.Token{
@@ -447,5 +447,32 @@ defmodule ParserTest do
     }
 
     assert node == expected
+
+    input = """
+      hello[0]
+    """
+
+    {program, _errors = []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    expected = %Monkeylang.AST.Program{
+      statements: [
+        %Monkeylang.AST.InfixExpression{
+          token: %Monkeylang.Token{type: :lbracket, literal: "[", precedence: 7},
+          operator: "[",
+          left: %Monkeylang.AST.Ident{
+            token: %Monkeylang.Token{type: :ident, literal: "hello", precedence: 0},
+            value: "hello"
+          },
+          right: %Monkeylang.AST.Integer{
+            token: %Monkeylang.Token{type: :int, literal: "0", precedence: 0},
+            value: 0
+          }
+        }
+      ]
+    }
+
+    assert program == expected
   end
 end
