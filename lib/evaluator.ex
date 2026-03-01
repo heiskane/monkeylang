@@ -23,10 +23,10 @@ defmodule Monkeylang.Function do
 end
 
 defmodule Monkeylang.Builtin do
-  # @enforce_keys [:params, :function]
-  defstruct [:params, :function]
+  @enforce_keys [:function]
+  defstruct [:function]
 
-  @type t :: %__MODULE__{params: list(), function: term()}
+  @type t :: %__MODULE__{function: function()}
 end
 
 defmodule Monkeylang.Error do
@@ -126,7 +126,6 @@ defmodule Monkeylang.Evaluator do
     do: {%Function{params: node.parameters, body: node.body, env: env}, env}
 
   def evaluate(node = %AST.CallExpression{}, env) do
-    dbg(node)
     {function, env} = evaluate(node.function, env)
 
     case eval_expressions(node.arguments, [], env) do
@@ -140,13 +139,15 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node, env),
     do: {%Error{message: "no handler implemented for node #{inspect(node)}"}, env}
 
-  def apply_function(%Builtin{params: params}, args) when length(params) != length(args),
-    do: %Error{
-      message: "builtin function params given #{length(args)}, needed #{length(params)}"
-    }
+  def apply_function(%Builtin{function: function}, args) do
+    case is_function(function, length(args)) do
+      true ->
+        Kernel.apply(function, args)
 
-  def apply_function(builtin = %Builtin{}, args) do
-    builtin.function.(args)
+      false ->
+        {:arity, arity} = :erlang.fun_info(function, :arity)
+        %Error{message: "expected #{arity} arguments but got #{length(args)}"}
+    end
   end
 
   def apply_function(%Function{params: params}, args)

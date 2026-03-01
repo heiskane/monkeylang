@@ -2,7 +2,7 @@ defmodule EvaluatorTest do
   use ExUnit.Case
   doctest Monkeylang.Evaluator
 
-  test "test return in nested statement" do
+  test "return in nested statement" do
     input = """
     if (10 > 1) {
       if (10 > 1) {
@@ -22,7 +22,7 @@ defmodule EvaluatorTest do
     assert result == %Monkeylang.Object{type: :integer, value: 10}
   end
 
-  test "test basic error" do
+  test "basic error" do
     input = """
       true + 1
     """
@@ -35,7 +35,7 @@ defmodule EvaluatorTest do
     {%Monkeylang.Error{}, _env} = Monkeylang.Evaluator.evaluate(program, env)
   end
 
-  test "test error early exit" do
+  test "error early exit" do
     input = """
       true + 1;
       1 + 1;
@@ -49,7 +49,7 @@ defmodule EvaluatorTest do
     {%Monkeylang.Error{}, _env} = Monkeylang.Evaluator.evaluate(program, env)
   end
 
-  test "test more errors" do
+  test "more errors" do
     env = Monkeylang.Environment.new()
 
     {%Monkeylang.Error{}, _env} =
@@ -89,7 +89,7 @@ defmodule EvaluatorTest do
       |> Monkeylang.Evaluator.evaluate(env)
   end
 
-  test "test prefix errors" do
+  test "prefix errors" do
     env = Monkeylang.Environment.new()
 
     {%Monkeylang.Error{}, _env} =
@@ -105,7 +105,7 @@ defmodule EvaluatorTest do
       |> Monkeylang.Evaluator.evaluate(env)
   end
 
-  test "test let statement" do
+  test "let statement" do
     env = Monkeylang.Environment.new()
 
     {_output, env} =
@@ -134,7 +134,7 @@ defmodule EvaluatorTest do
            }
   end
 
-  test "test function" do
+  test "function" do
     env = Monkeylang.Environment.new()
 
     input = """
@@ -154,7 +154,7 @@ defmodule EvaluatorTest do
            }
   end
 
-  test "test strings" do
+  test "strings" do
     env = Monkeylang.Environment.new()
 
     input = """
@@ -230,5 +230,10 @@ defmodule EvaluatorTest do
       |> Monkeylang.Parser.parse_tokens()
       |> elem(0)
       |> Monkeylang.Evaluator.evaluate(env)
+
+    assert output == %Monkeylang.Object{
+             type: :integer,
+             value: 5
+           }
   end
 end
