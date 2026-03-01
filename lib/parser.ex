@@ -226,7 +226,7 @@ defmodule Monkeylang.Parser do
   defp handle_let(
          [
            token = %Token{type: :let},
-           ident = %Token{type: :ident},
+           %Token{type: :ident, literal: name},
            %Token{type: :assign} | tail
          ],
          errors
@@ -235,7 +235,7 @@ defmodule Monkeylang.Parser do
 
     node = %Monkeylang.AST.Let{
       token: token,
-      name: ident.literal,
+      name: name,
       value: expression
     }
 
