@@ -217,4 +217,18 @@ defmodule EvaluatorTest do
              value: "hello world"
            }
   end
+
+  test "builtins" do
+    env = Monkeylang.Environment.new()
+
+    input = """
+      len("hello");
+    """
+
+    {output, _env} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+      |> elem(0)
+      |> Monkeylang.Evaluator.evaluate(env)
+  end
 end

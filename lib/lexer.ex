@@ -71,6 +71,7 @@ defmodule Monkeylang.Lexer do
   defp do_tokenize(["!", "=" | tail], tokens),
     do: do_tokenize(tail, [Token.new(:notequals, "!=") | tokens])
 
+  # handle strings
   defp do_tokenize(["\"" | tail], tokens) do
     {rest, value} = read_string(tail, "")
     token = Token.new(:string, value)

@@ -22,6 +22,13 @@ defmodule Monkeylang.Function do
   @type t :: %__MODULE__{params: list(), body: term(), env: term()}
 end
 
+defmodule Monkeylang.Builtin do
+  # @enforce_keys [:params, :function]
+  defstruct [:params, :function]
+
+  @type t :: %__MODULE__{params: list(), function: term()}
+end
+
 defmodule Monkeylang.Error do
   @enforce_keys [:message]
   defstruct [:message]
@@ -33,6 +40,7 @@ defmodule Monkeylang.Evaluator do
   alias Monkeylang.AST
   alias Monkeylang.Error
   alias Monkeylang.Object
+  alias Monkeylang.Builtin
   alias Monkeylang.Function
   alias Monkeylang.ReturnValue
   alias Monkeylang.Environment
@@ -118,6 +126,7 @@ defmodule Monkeylang.Evaluator do
     do: {%Function{params: node.parameters, body: node.body, env: env}, env}
 
   def evaluate(node = %AST.CallExpression{}, env) do
+    dbg(node)
     {function, env} = evaluate(node.function, env)
 
     case eval_expressions(node.arguments, [], env) do
@@ -131,10 +140,20 @@ defmodule Monkeylang.Evaluator do
   def evaluate(node, env),
     do: {%Error{message: "no handler implemented for node #{inspect(node)}"}, env}
 
-  def apply_function(function = %Function{}, args) when length(function.params) != length(args),
+  def apply_function(%Builtin{params: params}, args) when length(params) != length(args),
     do: %Error{
-      message: "function params given #{length(args)}, needed #{length(function.params)}"
+      message: "builtin function params given #{length(args)}, needed #{length(params)}"
     }
+
+  def apply_function(builtin = %Builtin{}, args) do
+    builtin.function.(args)
+  end
+
+  def apply_function(%Function{params: params}, args)
+      when length(params) != length(args),
+      do: %Error{
+        message: "function params given #{length(args)}, needed #{length(params)}"
+      }
 
   def apply_function(function = %Function{}, args) do
     env =
