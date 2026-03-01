@@ -133,6 +133,12 @@ defmodule Monkeylang.Parser do
     {tail, node, errors}
   end
 
+  defp parse_prefix([token = %Token{type: :lbracket} | tail], errors) do
+    {tokens, expressions, errors} = parse_expression_list(tail, :rbracket, errors, [])
+    node = %Monkeylang.AST.ArrayLiteral{token: token, elements: expressions}
+    {tokens, node, errors}
+  end
+
   defp parse_prefix([%Token{type: :lparen} | tail], errors) do
     {tokens, expression, errors} =
       parse_expression(tail, 0, errors)
@@ -168,7 +174,8 @@ defmodule Monkeylang.Parser do
        do: {tokens, left, errors}
 
   defp parse_infix([token = %Token{type: :lparen} | tail], function, _precedence, errors) do
-    {tokens, arguments, errors} = parse_call_params(tail, errors, [])
+    # {tokens, arguments, errors} = parse_call_params(tail, errors, [])
+    {tokens, arguments, errors} = parse_expression_list(tail, :rparen, errors, [])
     node = %Monkeylang.AST.CallExpression{token: token, function: function, arguments: arguments}
     {tokens, node, errors}
   end
@@ -227,15 +234,15 @@ defmodule Monkeylang.Parser do
     parse_function_params(tokens, errors, [node | params])
   end
 
-  defp parse_call_params([%Token{type: :rparen} | tail], errors, params),
-    do: {tail, Enum.reverse(params), errors}
+  defp parse_expression_list([%Token{type: type} | tail], ender, errors, acc) when type == ender,
+    do: {tail, Enum.reverse(acc), errors}
 
-  defp parse_call_params([%Token{type: :comma} | tail], errors, params),
-    do: parse_call_params(tail, errors, params)
+  defp parse_expression_list([%Token{type: :comma} | tail], ender, errors, acc),
+    do: parse_expression_list(tail, ender, errors, acc)
 
-  defp parse_call_params(tokens, errors, params) do
+  defp parse_expression_list(tokens, ender, errors, acc) do
     {tokens, expression, errors} = parse_expression(tokens, 0, errors)
-    parse_call_params(tokens, errors, [expression | params])
+    parse_expression_list(tokens, ender, errors, [expression | acc])
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do

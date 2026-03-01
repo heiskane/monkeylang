@@ -224,3 +224,20 @@ defmodule Monkeylang.AST.CallExpression do
     end
   end
 end
+
+defmodule Monkeylang.AST.ArrayLiteral do
+  @enforce_keys [:token, :elements]
+  defstruct [:token, :elements]
+
+  @type t :: %__MODULE__{
+          token: Monkeylang.Token.t(),
+          elements: list()
+        }
+
+  defimpl String.Chars, for: Monkeylang.AST.ArrayLiteral do
+    def to_string(node = %Monkeylang.AST.ArrayLiteral{}) do
+      elements = Enum.join(node.elements, ", ")
+      "[#{elements}]"
+    end
+  end
+end

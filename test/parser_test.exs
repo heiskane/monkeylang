@@ -410,4 +410,42 @@ defmodule ParserTest do
 
     assert node == expected
   end
+
+  test "arrays" do
+    input = """
+      ["hello", "world", 1];
+    """
+
+    {%Monkeylang.AST.Program{statements: [node]}, _errors = []} =
+      Monkeylang.Lexer.tokenize(input)
+      |> Monkeylang.Parser.parse_tokens()
+
+    expected = %Monkeylang.AST.ArrayLiteral{
+      token: %Monkeylang.Token{type: :lbracket, literal: "[", precedence: 0},
+      elements: [
+        %Monkeylang.AST.String{
+          token: %Monkeylang.Token{
+            type: :string,
+            literal: "hello",
+            precedence: 0
+          },
+          value: "hello"
+        },
+        %Monkeylang.AST.String{
+          token: %Monkeylang.Token{
+            type: :string,
+            literal: "world",
+            precedence: 0
+          },
+          value: "world"
+        },
+        %Monkeylang.AST.Integer{
+          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+          value: 1
+        }
+      ]
+    }
+
+    assert node == expected
+  end
 end
