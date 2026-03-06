@@ -49,7 +49,8 @@ defmodule Monkeylang.Evaluator do
   @yea %Object{type: :boolean, value: true}
   @nah %Object{type: :boolean, value: false}
 
-  @spec evaluate(term(), map()) :: {Object.t() | ReturnValue.t() | Error.t(), map()}
+  @spec evaluate(struct(), map()) ::
+          {Object.t() | ReturnValue.t() | Error.t() | Function.t() | Builtin.t(), map()}
   def evaluate(node = %AST.Integer{}, env),
     do: {%Object{type: :integer, value: node.value}, env}
 
