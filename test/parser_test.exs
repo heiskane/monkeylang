@@ -2,7 +2,7 @@ defmodule ParserTest do
   use ExUnit.Case
   doctest Monkeylang.Parser
 
-  test "test basic parsing" do
+  test "basic parsing" do
     input = """
       1 + 2 + 3
     """
@@ -16,22 +16,22 @@ defmodule ParserTest do
     # |> dbg()
 
     expected = %Monkeylang.AST.InfixExpression{
-      token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+      token: %Monkeylang.Token{type: :plus, literal: "+"},
       operator: "+",
       left: %Monkeylang.AST.InfixExpression{
-        token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+        token: %Monkeylang.Token{type: :plus, literal: "+"},
         operator: "+",
         left: %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+          token: %Monkeylang.Token{type: :int, literal: "1"},
           value: 1
         },
         right: %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "2", precedence: 0},
+          token: %Monkeylang.Token{type: :int, literal: "2"},
           value: 2
         }
       },
       right: %Monkeylang.AST.Integer{
-        token: %Monkeylang.Token{type: :int, literal: "3", precedence: 0},
+        token: %Monkeylang.Token{type: :int, literal: "3"},
         value: 3
       }
     }
@@ -39,7 +39,7 @@ defmodule ParserTest do
     assert node == expected
   end
 
-  test "test booleans" do
+  test "booleans" do
     input = """
       3 < 5 == true;
       true != false;
@@ -51,34 +51,34 @@ defmodule ParserTest do
 
     expected = [
       %Monkeylang.AST.InfixExpression{
-        token: %Monkeylang.Token{type: :equals, literal: "==", precedence: 1},
+        token: %Monkeylang.Token{type: :equals, literal: "=="},
         operator: "==",
         left: %Monkeylang.AST.InfixExpression{
-          token: %Monkeylang.Token{type: :lt, literal: "<", precedence: 2},
+          token: %Monkeylang.Token{type: :lt, literal: "<"},
           operator: "<",
           left: %Monkeylang.AST.Integer{
-            token: %Monkeylang.Token{type: :int, literal: "3", precedence: 0},
+            token: %Monkeylang.Token{type: :int, literal: "3"},
             value: 3
           },
           right: %Monkeylang.AST.Integer{
-            token: %Monkeylang.Token{type: :int, literal: "5", precedence: 0},
+            token: %Monkeylang.Token{type: :int, literal: "5"},
             value: 5
           }
         },
         right: %Monkeylang.AST.Boolean{
-          token: %Monkeylang.Token{type: true, literal: "true", precedence: 0},
+          token: %Monkeylang.Token{type: true, literal: "true"},
           value: true
         }
       },
       %Monkeylang.AST.InfixExpression{
-        token: %Monkeylang.Token{type: :notequals, literal: "!=", precedence: 1},
+        token: %Monkeylang.Token{type: :notequals, literal: "!="},
         operator: "!=",
         left: %Monkeylang.AST.Boolean{
-          token: %Monkeylang.Token{type: true, literal: "true", precedence: 0},
+          token: %Monkeylang.Token{type: true, literal: "true"},
           value: true
         },
         right: %Monkeylang.AST.Boolean{
-          token: %Monkeylang.Token{type: false, literal: "false", precedence: 0},
+          token: %Monkeylang.Token{type: false, literal: "false"},
           value: false
         }
       }
@@ -89,7 +89,7 @@ defmodule ParserTest do
     assert program.statements == expected
   end
 
-  test "test grouped" do
+  test "grouped" do
     input = """
       (1 + 2) * 3;
     """
@@ -101,22 +101,22 @@ defmodule ParserTest do
     [node | _] = program.statements
 
     expected = %Monkeylang.AST.InfixExpression{
-      token: %Monkeylang.Token{type: :asterisk, literal: "*", precedence: 4},
+      token: %Monkeylang.Token{type: :asterisk, literal: "*"},
       operator: "*",
       left: %Monkeylang.AST.InfixExpression{
-        token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+        token: %Monkeylang.Token{type: :plus, literal: "+"},
         operator: "+",
         left: %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+          token: %Monkeylang.Token{type: :int, literal: "1"},
           value: 1
         },
         right: %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "2", precedence: 0},
+          token: %Monkeylang.Token{type: :int, literal: "2"},
           value: 2
         }
       },
       right: %Monkeylang.AST.Integer{
-        token: %Monkeylang.Token{type: :int, literal: "3", precedence: 0},
+        token: %Monkeylang.Token{type: :int, literal: "3"},
         value: 3
       }
     }
@@ -126,7 +126,7 @@ defmodule ParserTest do
     assert node == expected
   end
 
-  test "test if else" do
+  test "if else" do
     input = """
       if (x < y) { x } else { y };
     """
@@ -139,33 +139,33 @@ defmodule ParserTest do
 
     expected =
       %Monkeylang.AST.IfExpression{
-        token: %Monkeylang.Token{type: :if, literal: "if", precedence: 0},
+        token: %Monkeylang.Token{type: :if, literal: "if"},
         condition: %Monkeylang.AST.InfixExpression{
-          token: %Monkeylang.Token{type: :lt, literal: "<", precedence: 2},
+          token: %Monkeylang.Token{type: :lt, literal: "<"},
           operator: "<",
           left: %Monkeylang.AST.Ident{
-            token: %Monkeylang.Token{type: :ident, literal: "x", precedence: 0},
+            token: %Monkeylang.Token{type: :ident, literal: "x"},
             value: "x"
           },
           right: %Monkeylang.AST.Ident{
-            token: %Monkeylang.Token{type: :ident, literal: "y", precedence: 0},
+            token: %Monkeylang.Token{type: :ident, literal: "y"},
             value: "y"
           }
         },
         consequence: %Monkeylang.AST.BlockStatement{
-          token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+          token: %Monkeylang.Token{type: :lbrace, literal: "{"},
           statements: [
             %Monkeylang.AST.Ident{
-              token: %Monkeylang.Token{type: :ident, literal: "x", precedence: 0},
+              token: %Monkeylang.Token{type: :ident, literal: "x"},
               value: "x"
             }
           ]
         },
         alternative: %Monkeylang.AST.BlockStatement{
-          token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+          token: %Monkeylang.Token{type: :lbrace, literal: "{"},
           statements: [
             %Monkeylang.AST.Ident{
-              token: %Monkeylang.Token{type: :ident, literal: "y", precedence: 0},
+              token: %Monkeylang.Token{type: :ident, literal: "y"},
               value: "y"
             }
           ]
@@ -175,7 +175,7 @@ defmodule ParserTest do
     assert node == expected
   end
 
-  test "test function" do
+  test "function" do
     input = """
       fn(a, b) { return a > b };
     """
@@ -187,42 +187,39 @@ defmodule ParserTest do
     [node | _] = program.statements
 
     expected = %Monkeylang.AST.FunctionLiteral{
-      token: %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
+      token: %Monkeylang.Token{type: :function, literal: "fn"},
       parameters: [
         %Monkeylang.AST.Ident{
-          token: %Monkeylang.Token{type: :ident, literal: "a", precedence: 0},
+          token: %Monkeylang.Token{type: :ident, literal: "a"},
           value: "a"
         },
         %Monkeylang.AST.Ident{
-          token: %Monkeylang.Token{type: :ident, literal: "b", precedence: 0},
+          token: %Monkeylang.Token{type: :ident, literal: "b"},
           value: "b"
         }
       ],
       body: %Monkeylang.AST.BlockStatement{
-        token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+        token: %Monkeylang.Token{type: :lbrace, literal: "{"},
         statements: [
           %Monkeylang.AST.Return{
             token: %Monkeylang.Token{
               type: :return,
-              literal: "return",
-              precedence: 0
+              literal: "return"
             },
             value: %Monkeylang.AST.InfixExpression{
-              token: %Monkeylang.Token{type: :gt, literal: ">", precedence: 2},
+              token: %Monkeylang.Token{type: :gt, literal: ">"},
               operator: ">",
               left: %Monkeylang.AST.Ident{
                 token: %Monkeylang.Token{
                   type: :ident,
-                  literal: "a",
-                  precedence: 0
+                  literal: "a"
                 },
                 value: "a"
               },
               right: %Monkeylang.AST.Ident{
                 token: %Monkeylang.Token{
                   type: :ident,
-                  literal: "b",
-                  precedence: 0
+                  literal: "b"
                 },
                 value: "b"
               }
@@ -247,26 +244,25 @@ defmodule ParserTest do
     [node | _] = program.statements
 
     expected = %Monkeylang.AST.FunctionLiteral{
-      token: %Monkeylang.Token{type: :function, literal: "fn", precedence: 0},
+      token: %Monkeylang.Token{type: :function, literal: "fn"},
       parameters: [],
       body: %Monkeylang.AST.BlockStatement{
-        token: %Monkeylang.Token{type: :lbrace, literal: "{", precedence: 0},
+        token: %Monkeylang.Token{type: :lbrace, literal: "{"},
         statements: [
           %Monkeylang.AST.Return{
             token: %Monkeylang.Token{
               type: :return,
-              literal: "return",
-              precedence: 0
+              literal: "return"
             },
             value: %Monkeylang.AST.InfixExpression{
-              token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+              token: %Monkeylang.Token{type: :plus, literal: "+"},
               operator: "+",
               left: %Monkeylang.AST.Integer{
-                token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+                token: %Monkeylang.Token{type: :int, literal: "1"},
                 value: 1
               },
               right: %Monkeylang.AST.Integer{
-                token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+                token: %Monkeylang.Token{type: :int, literal: "1"},
                 value: 1
               }
             }
@@ -290,72 +286,69 @@ defmodule ParserTest do
     [node | _] = program.statements
 
     expected = %Monkeylang.AST.CallExpression{
-      token: %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+      token: %Monkeylang.Token{type: :lparen, literal: "("},
       function: %Monkeylang.AST.Ident{
-        token: %Monkeylang.Token{type: :ident, literal: "add", precedence: 0},
+        token: %Monkeylang.Token{type: :ident, literal: "add"},
         value: "add"
       },
       arguments: [
         %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+          token: %Monkeylang.Token{type: :int, literal: "1"},
           value: 1
         },
         %Monkeylang.AST.InfixExpression{
-          token: %Monkeylang.Token{type: :asterisk, literal: "*", precedence: 4},
+          token: %Monkeylang.Token{type: :asterisk, literal: "*"},
           operator: "*",
           left: %Monkeylang.AST.Integer{
-            token: %Monkeylang.Token{type: :int, literal: "2", precedence: 0},
+            token: %Monkeylang.Token{type: :int, literal: "2"},
             value: 2
           },
           right: %Monkeylang.AST.Integer{
-            token: %Monkeylang.Token{type: :int, literal: "3", precedence: 0},
+            token: %Monkeylang.Token{type: :int, literal: "3"},
             value: 3
           }
         },
         %Monkeylang.AST.CallExpression{
-          token: %Monkeylang.Token{type: :lparen, literal: "(", precedence: 6},
+          token: %Monkeylang.Token{type: :lparen, literal: "("},
           function: %Monkeylang.AST.Ident{
-            token: %Monkeylang.Token{type: :ident, literal: "add", precedence: 0},
+            token: %Monkeylang.Token{type: :ident, literal: "add"},
             value: "add"
           },
           arguments: [
             %Monkeylang.AST.InfixExpression{
-              token: %Monkeylang.Token{type: :plus, literal: "+", precedence: 3},
+              token: %Monkeylang.Token{type: :plus, literal: "+"},
               operator: "+",
               left: %Monkeylang.AST.Integer{
-                token: %Monkeylang.Token{type: :int, literal: "4", precedence: 0},
+                token: %Monkeylang.Token{type: :int, literal: "4"},
                 value: 4
               },
               right: %Monkeylang.AST.InfixExpression{
                 token: %Monkeylang.Token{
                   type: :asterisk,
-                  literal: "*",
-                  precedence: 4
+                  literal: "*"
                 },
                 operator: "*",
                 left: %Monkeylang.AST.Integer{
                   token: %Monkeylang.Token{
                     type: :int,
-                    literal: "5",
-                    precedence: 0
+                    literal: "5"
                   },
                   value: 5
                 },
                 right: %Monkeylang.AST.Integer{
                   token: %Monkeylang.Token{
                     type: :int,
-                    literal: "1",
-                    precedence: 0
+                    literal: "1"
                   },
                   value: 1
                 }
               }
             },
             %Monkeylang.AST.PrefixExpression{
-              token: %Monkeylang.Token{type: :minus, literal: "-", precedence: 3},
+              token: %Monkeylang.Token{type: :minus, literal: "-"},
               operator: "-",
               right: %Monkeylang.AST.Integer{
-                token: %Monkeylang.Token{type: :int, literal: "2", precedence: 0},
+                token: %Monkeylang.Token{type: :int, literal: "2"},
                 value: 2
               }
             }
@@ -382,9 +375,9 @@ defmodule ParserTest do
       name: "asdf",
       value: %Monkeylang.AST.Integer{
         value: 1,
-        token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0}
+        token: %Monkeylang.Token{type: :int, literal: "1"}
       },
-      token: %Monkeylang.Token{type: :let, literal: "let", precedence: 0}
+      token: %Monkeylang.Token{type: :let, literal: "let"}
     }
 
     assert node == expected
@@ -401,9 +394,9 @@ defmodule ParserTest do
 
     expected = %Monkeylang.AST.Let{
       name: "a",
-      token: %Monkeylang.Token{literal: "let", precedence: 0, type: :let},
+      token: %Monkeylang.Token{type: :let, literal: "let"},
       value: %Monkeylang.AST.String{
-        token: %Monkeylang.Token{literal: "hello world", precedence: 0, type: :string},
+        token: %Monkeylang.Token{type: :string, literal: "hello world"},
         value: "hello world"
       }
     }
@@ -421,26 +414,24 @@ defmodule ParserTest do
       |> Monkeylang.Parser.parse_tokens()
 
     expected = %Monkeylang.AST.ArrayLiteral{
-      token: %Monkeylang.Token{type: :lbracket, literal: "[", precedence: 7},
+      token: %Monkeylang.Token{type: :lbracket, literal: "["},
       elements: [
         %Monkeylang.AST.String{
           token: %Monkeylang.Token{
             type: :string,
-            literal: "hello",
-            precedence: 0
+            literal: "hello"
           },
           value: "hello"
         },
         %Monkeylang.AST.String{
           token: %Monkeylang.Token{
             type: :string,
-            literal: "world",
-            precedence: 0
+            literal: "world"
           },
           value: "world"
         },
         %Monkeylang.AST.Integer{
-          token: %Monkeylang.Token{type: :int, literal: "1", precedence: 0},
+          token: %Monkeylang.Token{type: :int, literal: "1"},
           value: 1
         }
       ]
@@ -459,14 +450,14 @@ defmodule ParserTest do
     expected = %Monkeylang.AST.Program{
       statements: [
         %Monkeylang.AST.InfixExpression{
-          token: %Monkeylang.Token{type: :lbracket, literal: "[", precedence: 7},
+          token: %Monkeylang.Token{type: :lbracket, literal: "["},
           operator: "[",
           left: %Monkeylang.AST.Ident{
-            token: %Monkeylang.Token{type: :ident, literal: "hello", precedence: 0},
+            token: %Monkeylang.Token{type: :ident, literal: "hello"},
             value: "hello"
           },
           right: %Monkeylang.AST.Integer{
-            token: %Monkeylang.Token{type: :int, literal: "0", precedence: 0},
+            token: %Monkeylang.Token{type: :int, literal: "0"},
             value: 0
           }
         }

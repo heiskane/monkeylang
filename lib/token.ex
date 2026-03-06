@@ -1,6 +1,6 @@
 defmodule Monkeylang.Token do
-  @enforce_keys [:type, :literal, :precedence]
-  defstruct [:type, :literal, :precedence]
+  @enforce_keys [:type, :literal]
+  defstruct [:type, :literal]
 
   @token_types [
     :illegal,
@@ -53,16 +53,14 @@ defmodule Monkeylang.Token do
   @type token_type :: atom()
   @type t :: %__MODULE__{
           type: token_type(),
-          literal: String.t(),
-          precedence: integer()
+          literal: String.t()
         }
 
   @spec new(token_type(), String.t()) :: t()
   def new(type, literal) when type in @token_types do
     %__MODULE__{
       type: type,
-      literal: literal,
-      precedence: Map.get(@precedences, type, 0)
+      literal: literal
     }
   end
 
@@ -71,5 +69,6 @@ defmodule Monkeylang.Token do
           "Invalid token type: #{inspect(type)}. Allowed types: #{@token_types |> Enum.join(", ")}"
   end
 
-  def get_precedence(type), do: Map.get(@precedences, type, 0)
+  def get_precedence(%__MODULE__{type: type}),
+    do: Map.get(@precedences, type, 0)
 end

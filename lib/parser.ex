@@ -103,7 +103,7 @@ defmodule Monkeylang.Parser do
 
   defp parse_prefix([token | tail], errors) when token.type in [:minus, :bang] do
     {tokens, right, errors} =
-      parse_expression(tail, Token.get_precedence(token.type), errors)
+      parse_expression(tail, Token.get_precedence(token), errors)
 
     node = %Monkeylang.AST.PrefixExpression{token: token, operator: token.literal, right: right}
     {tokens, node, errors}
@@ -149,19 +149,23 @@ defmodule Monkeylang.Parser do
   defp parse_infix(tokens, nil, _precedence, errors),
     do: {tokens, nil, ["no left side for infix" | errors]}
 
-  defp parse_infix(tokens = [next | _], left, precedence, errors)
-       when next.type not in @infixable or not (precedence < next.precedence) do
-    {tokens, left, errors}
+  defp parse_infix(tokens = [next | _tail], left, precedence, errors) do
+    if next.type not in @infixable or not (precedence < Token.get_precedence(next)) do
+      {tokens, left, errors}
+    else
+      do_infixing(tokens, left, precedence, errors)
+    end
   end
 
-  defp parse_infix([token = %Token{type: :lparen} | tail], function, _precedence, errors) do
+  defp do_infixing([token = %Token{type: :lparen} | tail], function, _precedence, errors) do
     {tokens, arguments, errors} = parse_expression_list(tail, :rparen, errors, [])
     node = %Monkeylang.AST.CallExpression{token: token, function: function, arguments: arguments}
     {tokens, node, errors}
   end
 
-  defp parse_infix([next | tail], left, precedence, errors) do
-    {tokens, right, errors} = parse_expression(tail, next.precedence, errors)
+  defp do_infixing([next | tail], left, precedence, errors) do
+    next_precedence = Token.get_precedence(next)
+    {tokens, right, errors} = parse_expression(tail, next_precedence, errors)
 
     infix = %Monkeylang.AST.InfixExpression{
       token: next,
@@ -218,7 +222,8 @@ defmodule Monkeylang.Parser do
   end
 
   defp handle_return([token = %Token{type: :return} | tail], errors) do
-    {tokens, expression, errors} = parse_expression(tail, token.precedence, errors)
+    precedence = Token.get_precedence(token)
+    {tokens, expression, errors} = parse_expression(tail, precedence, errors)
     node = %Monkeylang.AST.Return{token: token, value: expression}
     {tokens, node, errors}
   end
@@ -231,7 +236,8 @@ defmodule Monkeylang.Parser do
          ],
          errors
        ) do
-    {tokens, expression, errors} = parse_expression(tail, token.precedence, errors)
+    precedence = Token.get_precedence(token)
+    {tokens, expression, errors} = parse_expression(tail, precedence, errors)
 
     node = %Monkeylang.AST.Let{
       token: token,
