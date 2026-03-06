@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Repl do
+defmodule Mix.Tasks.Monke.Repl do
   use Mix.Task
 
   @shortdoc "Runs Mokeylang REPL"

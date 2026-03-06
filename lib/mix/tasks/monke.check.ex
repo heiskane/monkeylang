@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Check do
+defmodule Mix.Tasks.Monke.Check do
   use Mix.Task
 
   @shortdoc "Runs dialyzer and tests"
