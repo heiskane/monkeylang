@@ -114,6 +114,14 @@ defmodule Monkeylang.Evaluator do
     {object, env}
   end
 
+  def evaluate(node = %AST.ArrayLiteral{}, env) do
+    with {:ok, {elements, env}} <- eval_expressions(node.elements, [], env) do
+      {%Object{type: :array, value: elements}, env}
+    else
+      {:error, error} -> {error, env}
+    end
+  end
+
   def evaluate(obj = %Object{type: :null}, env), do: {obj, env}
   def evaluate(nil, env), do: {%Object{type: :null, value: nil}, env}
 
@@ -131,7 +139,7 @@ defmodule Monkeylang.Evaluator do
 
     case eval_expressions(node.arguments, [], env) do
       {:ok, {args, env}} -> {apply_function(function, args), env}
-      {:error, error} -> error
+      {:error, error} -> {error, env}
     end
   end
 
@@ -170,8 +178,8 @@ defmodule Monkeylang.Evaluator do
     result
   end
 
-  defp eval_expressions([], results, env), do: {:ok, {results, env}}
   defp eval_expressions(_statements, [error = %Error{} | _tail], _env), do: {:error, error}
+  defp eval_expressions([], results, env), do: {:ok, {results, env}}
 
   defp eval_expressions([head | tail], results, env) do
     {result, env} = evaluate(head, env)
